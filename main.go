@@ -714,7 +714,7 @@ func main() {
 	fmt.Println("   POST /api/images/upload")
 	fmt.Println("   POST /api/images/{id}/labels")
 
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	log.Fatal(http.ListenAndServe(":1110", handler))
 }
 
 // Utility functions
