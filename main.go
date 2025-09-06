@@ -2042,7 +2042,7 @@ func checkForUpdatesHandler(w http.ResponseWriter, r *http.Request) {
 	appVersionsMutex.RLock()
 	defer appVersionsMutex.RUnlock()
 
-	// Find the latest active version
+	// Find the latest active
 	var latestVersion *AppVersion
 	for _, version := range appVersions {
 		if !version.IsActive {
