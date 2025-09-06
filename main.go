@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/cors"
+	_ "modernc.org/sqlite"
 )
 
 // SSE Client management
@@ -186,7 +186,7 @@ const (
 // Initialize SQLite database
 func initDatabase() error {
 	var err error
-	db, err = sql.Open("sqlite3", DB_FILE)
+	db, err = sql.Open("sqlite", DB_FILE)
 	if err != nil {
 		return fmt.Errorf("failed to open database: %v", err)
 	}
