@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageLabel Pro Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#1E40AF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-gray-50">
+    <!-- Mobile menu button -->
+    <div class="lg:hidden fixed top-4 left-4 z-50">
+        <button id="mobile-menu-btn" class="bg-white p-2 rounded-lg shadow-lg text-gray-600 hover:text-gray-900">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+
+    <div class="flex h-screen bg-gray-50">
+        <!-- Sidebar -->
+        <div id="sidebar" class="hidden lg:flex lg:w-64 lg:flex-col">
+            <div class="flex flex-col flex-grow bg-white border-r border-gray-200 pt-5 pb-4 overflow-y-auto">
+                <!-- Logo -->
+                <div class="flex items-center flex-shrink-0 px-4 mb-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                                <i class="fas fa-tags text-white text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <h1 class="text-xl font-bold text-gray-900">ImageLabel</h1>
+                            <p class="text-sm text-gray-500">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="mt-5 flex-1 px-2 space-y-1">
+                    <button onclick="showTab('overview')" class="nav-btn bg-primary text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                        <i class="fas fa-chart-dashboard mr-3 text-lg"></i>
+                        Overview
+                    </button>
+                    <button onclick="showTab('users')" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                        <i class="fas fa-users mr-3 text-lg text-gray-400 group-hover:text-gray-500"></i>
+                        Users Management
+                    </button>
+                    <button onclick="showTab('transactions')" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                        <i class="fas fa-credit-card mr-3 text-lg text-gray-400 group-hover:text-gray-500"></i>
+                        Transactions
+                    </button>
+                    <button onclick="showTab('packages')" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                        <i class="fas fa-box mr-3 text-lg text-gray-400 group-hover:text-gray-500"></i>
+                        Credit Packages
+                    </button>
+                    <button onclick="showTab('payment-accounts')" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                        <i class="fas fa-wallet mr-3 text-lg text-gray-400 group-hover:text-gray-500"></i>
+                        Payment Accounts
+                    </button>
+                    <button onclick="showTab('settings')" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                        <i class="fas fa-cog mr-3 text-lg text-gray-400 group-hover:text-gray-500"></i>
+                        System Settings
+                    </button>
+                </nav>
+
+                <!-- Footer -->
+                <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+                    <div class="flex items-center">
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-700">Admin User</p>
+                            <p class="text-xs text-gray-500" id="current-time"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile sidebar -->
+        <div id="mobile-sidebar" class="fixed inset-0 z-40 lg:hidden hidden">
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+            <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+                <div class="absolute top-0 right-0 -mr-12 pt-2">
+                    <button id="close-sidebar" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                        <i class="fas fa-times text-white"></i>
+                    </button>
+                </div>
+                <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+                    <div class="flex-shrink-0 flex items-center px-4 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-tags text-white text-lg"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h1 class="text-xl font-bold text-gray-900">ImageLabel</h1>
+                        </div>
+                    </div>
+                    <nav class="mt-5 px-2 space-y-1">
+                        <button onclick="showTab('overview'); closeMobileSidebar()" class="nav-btn bg-primary text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                            <i class="fas fa-chart-dashboard mr-3"></i>
+                            Overview
+                        </button>
+                        <button onclick="showTab('users'); closeMobileSidebar()" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                            <i class="fas fa-users mr-3"></i>
+                            Users
+                        </button>
+                        <button onclick="showTab('transactions'); closeMobileSidebar()" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                            <i class="fas fa-credit-card mr-3"></i>
+                            Transactions
+                        </button>
+                        <button onclick="showTab('packages'); closeMobileSidebar()" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                            <i class="fas fa-box mr-3"></i>
+                            Packages
+                        </button>
+                        <button onclick="showTab('payment-accounts'); closeMobileSidebar()" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                            <i class="fas fa-wallet mr-3"></i>
+                            Payments
+                        </button>
+                        <button onclick="showTab('settings'); closeMobileSidebar()" class="nav-btn text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full">
+                            <i class="fas fa-cog mr-3"></i>
+                            Settings
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-hidden">
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <!-- Page header -->
+                <div class="bg-white shadow">
+                    <div class="px-4 sm:px-6 lg:max-w-6xl lg:mx-auto lg:px-8">
+                        <div class="py-6 md:flex md:items-center md:justify-between lg:border-t lg:border-gray-200">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center">
+                                    <div>
+                                        <div class="flex items-center">
+                                            <h1 class="ml-3 text-2xl font-bold leading-7 text-gray-900 sm:leading-9 sm:truncate" id="page-title">
+                                                Dashboard Overview
+                                            </h1>
+                                        </div>
+                                        <dl class="mt-6 flex flex-col sm:ml-3 sm:mt-1 sm:flex-row sm:flex-wrap">
+                                            <dt class="sr-only">Status</dt>
+                                            <dd class="flex items-center text-sm text-gray-500 font-medium capitalize sm:mr-6" id="page-subtitle">
+                                                <i class="fas fa-circle text-green-400 mr-1.5"></i>
+                                                System Online
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex space-x-3 md:mt-0 md:ml-4">
+                                <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" onclick="refreshAll()">
+                                    <i class="fas fa-refresh mr-2"></i>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="py-8">
+                    <div class="max-w-3xl mx-auto sm:px-6 lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-12 lg:gap-8">
+                        <div class="lg:col-span-12">
+                            <!-- Overview Tab -->
+                            <div id="overview-tab" class="tab-content">
+                                <!-- Stats -->
+                                <div class="mb-8">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">System Statistics</h3>
+                                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" id="stats-container">
+                                        <!-- Will be populated by HTMX -->
+                                        <div class="bg-white overflow-hidden shadow rounded-lg stat-card">
+                                            <div class="p-5">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <i class="fas fa-users text-blue-600 text-2xl"></i>
+                                                    </div>
+                                                    <div class="ml-5 w-0 flex-1">
+                                                        <dl>
+                                                            <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                                                            <dd class="text-lg font-medium text-gray-900">Loading...</dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white overflow-hidden shadow rounded-lg stat-card">
+                                            <div class="p-5">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+                                                    </div>
+                                                    <div class="ml-5 w-0 flex-1">
+                                                        <dl>
+                                                            <dt class="text-sm font-medium text-gray-500 truncate">Pending Payments</dt>
+                                                            <dd class="text-lg font-medium text-gray-900">Loading...</dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white overflow-hidden shadow rounded-lg stat-card">
+                                            <div class="p-5">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <i class="fas fa-dollar-sign text-green-600 text-2xl"></i>
+                                                    </div>
+                                                    <div class="ml-5 w-0 flex-1">
+                                                        <dl>
+                                                            <dt class="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
+                                                            <dd class="text-lg font-medium text-gray-900">Loading...</dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white overflow-hidden shadow rounded-lg stat-card">
+                                            <div class="p-5">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <i class="fas fa-image text-purple-600 text-2xl"></i>
+                                                    </div>
+                                                    <div class="ml-5 w-0 flex-1">
+                                                        <dl>
+                                                            <dt class="text-sm font-medium text-gray-500 truncate">Images Processed</dt>
+                                                            <dd class="text-lg font-medium text-gray-900">Loading...</dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recent Activity -->
+                                <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                                    <div class="bg-white shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                            <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Transactions</h3>
+                                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Latest payment transactions</p>
+                                        </div>
+                                        <div class="px-4 py-5 sm:p-6" hx-get="/api/admin/transactions" hx-trigger="load, every 30s" hx-target="#recent-transactions">
+                                            <div id="recent-transactions">
+                                                <div class="text-center py-4">
+                                                    <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                                                    <p class="text-gray-500 mt-2">Loading...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                            <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Users</h3>
+                                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Newly registered users</p>
+                                        </div>
+                                        <div class="px-4 py-5 sm:p-6" hx-get="/api/admin/users" hx-trigger="load, every 30s" hx-target="#recent-users">
+                                            <div id="recent-users">
+                                                <div class="text-center py-4">
+                                                    <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                                                    <p class="text-gray-500 mt-2">Loading...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Users Tab -->
+                            <div id="users-tab" class="tab-content hidden">
+                                <div class="bg-white shadow rounded-lg">
+                                    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <h3 class="text-lg leading-6 font-medium text-gray-900">Users Management</h3>
+                                                <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage all registered users and their details</p>
+                                            </div>
+                                            <div class="mt-4 sm:mt-0 flex space-x-3">
+                                                <button onclick="refreshUsers()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    <i class="fas fa-sync-alt mr-2"></i>
+                                                    Refresh
+                                                </button>
+                                                <button onclick="exportUsers()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    <i class="fas fa-download mr-2"></i>
+                                                    Export
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Search and Filter Section -->
+                                    <div class="px-4 py-4 border-b border-gray-200 bg-gray-50">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="relative rounded-md shadow-sm">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <i class="fas fa-search text-gray-400"></i>
+                                                    </div>
+                                                    <input type="text" id="userSearch" onkeyup="filterUsers()" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md" placeholder="Search by Device ID, ID, or Credits...">
+                                                </div>
+                                            </div>
+                                            <div class="flex space-x-2">
+                                                <select id="sortBy" onchange="sortUsers()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="created_at">Sort by Created Date</option>
+                                                    <option value="last_active_at">Sort by Last Active</option>
+                                                    <option value="credits">Sort by Credits</option>
+                                                    <option value="total_photos">Sort by Total Photos</option>
+                                                </select>
+                                                <select id="sortOrder" onchange="sortUsers()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="desc">Descending</option>
+                                                    <option value="asc">Ascending</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div hx-get="/api/admin/users" hx-trigger="load" hx-target="#users-content">
+                                        <div id="users-content">
+                                            <div class="text-center py-12">
+                                                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                                                    <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i>
+                                                </div>
+                                                <h3 class="text-lg font-medium text-gray-900 mb-2">Loading Users</h3>
+                                                <p class="text-gray-500">Please wait while we fetch the user data...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Transactions Tab -->
+                            <div id="transactions-tab" class="tab-content hidden">
+                                <div class="bg-white shadow rounded-lg">
+                                    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <h3 class="text-lg leading-6 font-medium text-gray-900">Payment Transactions</h3>
+                                                <p class="mt-1 max-w-2xl text-sm text-gray-500">Review and manage payment transactions</p>
+                                            </div>
+                                            <div class="mt-4 sm:mt-0 flex space-x-2">
+                                                <button onclick="filterTransactions('pending')" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    Pending
+                                                </button>
+                                                <button onclick="filterTransactions('approved')" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-500 hover:bg-green-600">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    Approved
+                                                </button>
+                                                <button onclick="filterTransactions('rejected')" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-500 hover:bg-red-600">
+                                                    <i class="fas fa-times mr-1"></i>
+                                                    Rejected
+                                                </button>
+                                                <button onclick="filterTransactions('all')" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                    <i class="fas fa-list mr-1"></i>
+                                                    All
+                                                </button>
+                                                <button onclick="refreshTransactions()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                                    <i class="fas fa-sync-alt mr-2"></i>
+                                                    Refresh
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Search and Filter Section -->
+                                    <div class="px-4 py-4 border-b border-gray-200 bg-gray-50">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="relative rounded-md shadow-sm">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <i class="fas fa-search text-gray-400"></i>
+                                                    </div>
+                                                    <input type="text" id="transactionSearch" onkeyup="filterTransactionsList()" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md" placeholder="Search by Transaction ID, Device ID, or Amount...">
+                                                </div>
+                                            </div>
+                                            <div class="flex space-x-2">
+                                                <select id="transactionSortBy" onchange="sortTransactions()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="created_at">Sort by Date</option>
+                                                    <option value="amount_mmk">Sort by Amount</option>
+                                                    <option value="status">Sort by Status</option>
+                                                    <option value="payment_method">Sort by Method</option>
+                                                </select>
+                                                <select id="transactionSortOrder" onchange="sortTransactions()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="desc">Descending</option>
+                                                    <option value="asc">Ascending</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div hx-get="/api/admin/transactions" hx-trigger="load" hx-target="#transactions-content">
+                                        <div id="transactions-content">
+                                            <div class="text-center py-12">
+                                                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                                                    <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i>
+                                                </div>
+                                                <h3 class="text-lg font-medium text-gray-900 mb-2">Loading Transactions</h3>
+                                                <p class="text-gray-500">Please wait while we fetch the transaction data...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Credit Packages Tab -->
+                            <div id="packages-tab" class="tab-content hidden">
+                                <div class="bg-white shadow rounded-lg">
+                                    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <h3 class="text-lg leading-6 font-medium text-gray-900">Credit Packages</h3>
+                                                <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage credit packages available for purchase</p>
+                                            </div>
+                                            <div class="mt-4 sm:mt-0 flex space-x-3">
+                                                <button onclick="refreshPackages()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    <i class="fas fa-sync-alt mr-2"></i>
+                                                    Refresh
+                                                </button>
+                                                <button onclick="openPackageModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    <i class="fas fa-plus mr-2"></i>
+                                                    Add Package
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Search and Filter Section -->
+                                    <div class="px-4 py-4 border-b border-gray-200 bg-gray-50">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="relative rounded-md shadow-sm">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <i class="fas fa-search text-gray-400"></i>
+                                                    </div>
+                                                    <input type="text" id="packageSearch" onkeyup="filterPackages()" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md" placeholder="Search by Package Name, Credits, or Price...">
+                                                </div>
+                                            </div>
+                                            <div class="flex space-x-2">
+                                                <select id="packageSortBy" onchange="sortPackages()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="credits">Sort by Credits</option>
+                                                    <option value="price_mmk">Sort by Price</option>
+                                                    <option value="name">Sort by Name</option>
+                                                    <option value="created_at">Sort by Date</option>
+                                                </select>
+                                                <select id="packageSortOrder" onchange="sortPackages()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="asc">Ascending</option>
+                                                    <option value="desc">Descending</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div hx-get="/api/admin/credit-packages" hx-trigger="load" hx-target="#packages-content">
+                                        <div id="packages-content">
+                                            <div class="text-center py-12">
+                                                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                                                    <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i>
+                                                </div>
+                                                <h3 class="text-lg font-medium text-gray-900 mb-2">Loading Credit Packages</h3>
+                                                <p class="text-gray-500">Please wait while we fetch the package data...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Accounts Tab -->
+                            <div id="payment-accounts-tab" class="tab-content hidden">
+                                <div class="bg-white shadow rounded-lg">
+                                    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <h3 class="text-lg leading-6 font-medium text-gray-900">Payment Accounts</h3>
+                                                <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage payment methods and account details</p>
+                                            </div>
+                                            <div class="mt-4 sm:mt-0 flex space-x-3">
+                                                <button onclick="refreshPaymentAccounts()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    <i class="fas fa-sync-alt mr-2"></i>
+                                                    Refresh
+                                                </button>
+                                                <button onclick="openPaymentModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    <i class="fas fa-plus mr-2"></i>
+                                                    Add Account
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Search and Filter Section -->
+                                    <div class="px-4 py-4 border-b border-gray-200 bg-gray-50">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="relative rounded-md shadow-sm">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <i class="fas fa-search text-gray-400"></i>
+                                                    </div>
+                                                    <input type="text" id="paymentAccountSearch" onkeyup="filterPaymentAccounts()" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md" placeholder="Search by Account Name, Method, or Number...">
+                                                </div>
+                                            </div>
+                                            <div class="flex space-x-2">
+                                                <select id="paymentAccountFilter" onchange="filterPaymentAccountsByStatus()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="all">All Accounts</option>
+                                                    <option value="active">Active Only</option>
+                                                    <option value="inactive">Inactive Only</option>
+                                                </select>
+                                                <select id="paymentMethodFilter" onchange="filterPaymentAccountsByMethod()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                                    <option value="all">All Methods</option>
+                                                    <option value="KBZ Pay">KBZ Pay</option>
+                                                    <option value="Wave Money">Wave Money</option>
+                                                    <option value="CB Pay">CB Pay</option>
+                                                    <option value="AYA Pay">AYA Pay</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div hx-get="/api/admin/payment/accounts" hx-trigger="load" hx-target="#payment-accounts-content">
+                                        <div id="payment-accounts-content">
+                                            <div class="text-center py-12">
+                                                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                                                    <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i>
+                                                </div>
+                                                <h3 class="text-lg font-medium text-gray-900 mb-2">Loading Payment Accounts</h3>
+                                                <p class="text-gray-500">Please wait while we fetch the payment account data...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Settings Tab -->
+                            <div id="settings-tab" class="tab-content hidden">
+                                <div class="space-y-6">
+                                    <!-- Settings Configuration Card -->
+                                    <div class="bg-white shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                                <div>
+                                                    <h3 class="text-lg leading-6 font-medium text-gray-900">System Settings</h3>
+                                                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Configure system-wide settings and pricing</p>
+                                                </div>
+                                                <div class="mt-4 sm:mt-0">
+                                                    <button onclick="loadCurrentSettings()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                        <i class="fas fa-sync-alt mr-2"></i>
+                                                        Refresh Settings
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="px-4 py-5 sm:p-6">
+                                            <form id="settingsForm" onsubmit="updateSystemSettings(event)" class="space-y-6">
+                                                <!-- Pricing Settings Section -->
+                                                <div class="bg-gray-50 rounded-lg p-6">
+                                                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                                        <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
+                                                        Pricing Configuration
+                                                    </h4>
+                                                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                                                        <div>
+                                                            <label for="credits_per_photo" class="block text-sm font-medium text-gray-700">Credits per Photo</label>
+                                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <i class="fas fa-coins text-gray-400"></i>
+                                                                </div>
+                                                                <input type="number" name="credits_per_photo" id="credits_per_photo" 
+                                                                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md"
+                                                                       min="1" required>
+                                                            </div>
+                                                            <p class="mt-2 text-sm text-gray-500">How many credits does one photo cost</p>
+                                                        </div>
+
+                                                        <div>
+                                                            <label for="credit_price_mmk" class="block text-sm font-medium text-gray-700">Credit Price (MMK)</label>
+                                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <span class="text-gray-400">₭</span>
+                                                                </div>
+                                                                <input type="number" name="credit_price_mmk" id="credit_price_mmk"
+                                                                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md"
+                                                                       min="1" required>
+                                                            </div>
+                                                            <p class="mt-2 text-sm text-gray-500">Price per credit in Myanmar Kyat</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- User Limits Section -->
+                                                <div class="bg-blue-50 rounded-lg p-6">
+                                                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                                        <i class="fas fa-users text-blue-600 mr-2"></i>
+                                                        User Limits
+                                                    </h4>
+                                                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                                                        <div>
+                                                            <label for="free_photos_limit" class="block text-sm font-medium text-gray-700">Free Photos Limit</label>
+                                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <i class="fas fa-gift text-gray-400"></i>
+                                                                </div>
+                                                                <input type="number" name="free_photos_limit" id="free_photos_limit"
+                                                                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md"
+                                                                       min="0" required>
+                                                            </div>
+                                                            <p class="mt-2 text-sm text-gray-500">Number of free photos per device</p>
+                                                        </div>
+
+                                                        <div>
+                                                            <label for="minimum_purchase" class="block text-sm font-medium text-gray-700">Minimum Purchase (MMK)</label>
+                                                            <div class="mt-1 relative rounded-md shadow-sm">
+                                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <span class="text-gray-400">₭</span>
+                                                                </div>
+                                                                <input type="number" name="minimum_purchase" id="minimum_purchase"
+                                                                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md"
+                                                                       min="1" required>
+                                                            </div>
+                                                            <p class="mt-2 text-sm text-gray-500">Minimum purchase amount</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex justify-end space-x-3">
+                                                    <button type="button" onclick="resetSettings()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                        <i class="fas fa-undo mr-2"></i>
+                                                        Reset
+                                                    </button>
+                                                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                        <i id="settings-loading" class="fas fa-spinner fa-spin mr-2 hidden"></i>
+                                                        <i class="fas fa-save mr-2"></i>
+                                                        Save Settings
+                                                    </button>
+                                                </div>
+
+                                                <div id="settings-response" class="mt-4"></div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- Current Settings Display Card -->
+                                    <div class="bg-white shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                            <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+                                                <i class="fas fa-info-circle text-indigo-600 mr-2"></i>
+                                                Current Settings Overview
+                                            </h3>
+                                            <p class="mt-1 max-w-2xl text-sm text-gray-500">View current system configuration and live statistics</p>
+                                        </div>
+                                        <div class="px-4 py-5 sm:p-6">
+                                            <div id="current-settings">
+                                                <div class="text-center py-12">
+                                                    <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                                                        <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i>
+                                                    </div>
+                                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Loading Settings</h3>
+                                                    <p class="text-gray-500">Please wait while we fetch the current configuration...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Credit Package Modal -->
+    <div id="package-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Add Credit Package</h3>
+                        <button onclick="closePackageModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="packageForm" onsubmit="addPackage(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Package Name</label>
+                                <input type="text" id="packageName" name="name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Credits</label>
+                                <input type="number" id="packageCredits" name="credits" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" min="1" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Price (MMK)</label>
+                                <input type="number" id="packagePrice" name="price_mmk" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" min="1" required>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="packageActive" name="is_active" value="true" checked class="rounded border-gray-300 text-primary focus:ring-primary">
+                                    <span class="ml-2 text-sm text-gray-700">Active</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="packageDefault" name="is_default" value="true" class="rounded border-gray-300 text-primary focus:ring-primary">
+                                    <span class="ml-2 text-sm text-gray-700">Default</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" onclick="closePackageModal()" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-secondary">
+                                <i id="package-loading" class="fas fa-spinner fa-spin mr-2 hidden"></i>
+                                Add Package
+                            </button>
+                        </div>
+                        <div id="package-modal-response" class="mt-4"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Account Modal -->
+    <div id="payment-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Add Payment Account</h3>
+                        <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="paymentAccountForm" onsubmit="addPaymentAccount(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+                                <select id="paymentMethod" name="method" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" required>
+                                    <option value="">Select method...</option>
+                                    <option value="wavepay">WavePay</option>
+                                    <option value="kbzpay">KBZ Pay</option>
+                                    <option value="cbpay">CB Pay</option>
+                                    <option value="ayapay">AYA Pay</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Account Name</label>
+                                <input type="text" id="paymentAccountName" name="account_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Account Number</label>
+                                <input type="text" id="paymentAccountNumber" name="account_number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">QR Code (optional)</label>
+                                <textarea id="paymentQRCode" name="qr_code" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" onclick="closePaymentModal()" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-secondary">
+                                <i id="payment-loading" class="fas fa-spinner fa-spin mr-2 hidden"></i>
+                                Add Account
+                            </button>
+                        </div>
+                        <div id="payment-modal-response" class="mt-4"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Payment Account Modal -->
+    <div id="edit-payment-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Payment Account</h3>
+                        <button onclick="closeEditPaymentModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="editPaymentAccountForm" onsubmit="updatePaymentAccount(event)">
+                        <input type="hidden" id="editAccountId" name="account_id">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+                                <select id="editPaymentMethod" name="method" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" required>
+                                    <option value="">Select method...</option>
+                                    <option value="wavepay">WavePay</option>
+                                    <option value="kbzpay">KBZ Pay</option>
+                                    <option value="cbpay">CB Pay</option>
+                                    <option value="ayapay">AYA Pay</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Account Name</label>
+                                <input type="text" id="editPaymentAccountName" name="account_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Account Number</label>
+                                <input type="text" id="editPaymentAccountNumber" name="account_number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">QR Code (optional)</label>
+                                <textarea id="editPaymentQRCode" name="qr_code" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" onclick="closeEditPaymentModal()" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-secondary">
+                                <i id="edit-payment-loading" class="fas fa-spinner fa-spin mr-2 hidden"></i>
+                                Update Account
+                            </button>
+                        </div>
+                        <div id="edit-payment-modal-response" class="mt-4"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            loadStats();
+            loadCurrentSettings();
+        });
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString();
+        }
+
+        // Helper function to safely format dates
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'Invalid Date';
+                return date.toLocaleDateString();
+            } catch (e) {
+                return 'Invalid Date';
+            }
+        }
+
+        // Helper function to safely format datetime
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'Invalid Date';
+                return date.toLocaleString();
+            } catch (e) {
+                return 'Invalid Date';
+            }
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('bg-primary', 'text-white');
+            event.target.classList.remove('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+
+            // Update page title
+            const titles = {
+                'overview': 'Dashboard Overview',
+                'users': 'Users Management',
+                'transactions': 'Payment Transactions',
+                'packages': 'Credit Packages',
+                'payment-accounts': 'Payment Accounts',
+                'settings': 'System Settings'
+            };
+            document.getElementById('page-title').textContent = titles[tabName];
+            
+            // Load data for specific tabs
+            if (tabName === 'settings') {
+                loadCurrentSettings();
+            }
+        }
+
+        function openMobileSidebar() {
+            document.getElementById('mobile-sidebar').classList.remove('hidden');
+        }
+
+        function closeMobileSidebar() {
+            document.getElementById('mobile-sidebar').classList.add('hidden');
+        }
+
+        function openPackageModal() {
+            document.getElementById('package-modal').classList.remove('hidden');
+        }
+
+        function closePackageModal() {
+            document.getElementById('package-modal').classList.add('hidden');
+        }
+
+        function openPaymentModal() {
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
+        function openEditPaymentModal() {
+            document.getElementById('edit-payment-modal').classList.remove('hidden');
+        }
+
+        function closeEditPaymentModal() {
+            document.getElementById('edit-payment-modal').classList.add('hidden');
+        }
+
+        async function addPackage(event) {
+            event.preventDefault();
+            
+            const loadingIndicator = document.getElementById('package-loading');
+            const responseDiv = document.getElementById('package-modal-response');
+            
+            try {
+                // Show loading
+                loadingIndicator.classList.remove('hidden');
+                responseDiv.innerHTML = '';
+                
+                // Collect form data
+                const packageData = {
+                    name: document.getElementById('packageName').value.trim(),
+                    credits: parseInt(document.getElementById('packageCredits').value),
+                    price_mmk: parseInt(document.getElementById('packagePrice').value),
+                    is_active: document.getElementById('packageActive').checked,
+                    is_default: document.getElementById('packageDefault').checked
+                };
+                
+                console.log('Sending package data:', packageData);
+                
+                // Send request
+                const response = await fetch('/api/admin/credit-packages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(packageData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    responseDiv.innerHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-green-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-green-800">Success!</p>
+                                    <p class="text-sm text-green-700 mt-1">${result.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Reset form
+                    document.getElementById('packageForm').reset();
+                    document.getElementById('packageActive').checked = true; // Reset to checked
+                    
+                    // Refresh packages list
+                    setTimeout(() => {
+                        refreshPackages();
+                        closePackageModal();
+                    }, 1500);
+                } else {
+                    throw new Error(result.message || 'Failed to add package');
+                }
+                
+            } catch (error) {
+                console.error('Error adding package:', error);
+                responseDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">Error!</p>
+                                <p class="text-sm text-red-700 mt-1">${error.message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                // Hide loading
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        async function addPaymentAccount(event) {
+            event.preventDefault();
+            
+            const loadingIndicator = document.getElementById('payment-loading');
+            const responseDiv = document.getElementById('payment-modal-response');
+            
+            try {
+                // Show loading
+                loadingIndicator.classList.remove('hidden');
+                responseDiv.innerHTML = '';
+                
+                // Collect form data
+                const accountData = {
+                    method: document.getElementById('paymentMethod').value.trim(),
+                    account_name: document.getElementById('paymentAccountName').value.trim(),
+                    account_number: document.getElementById('paymentAccountNumber').value.trim(),
+                    qr_code: document.getElementById('paymentQRCode').value.trim()
+                };
+                
+                console.log('Sending payment account data:', accountData);
+                
+                // Send request
+                const response = await fetch('/api/admin/payment/accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(accountData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    responseDiv.innerHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-green-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-green-800">Success!</p>
+                                    <p class="text-sm text-green-700 mt-1">${result.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Reset form
+                    document.getElementById('paymentAccountForm').reset();
+                    
+                    // Refresh payment accounts list
+                    setTimeout(() => {
+                        refreshPaymentAccounts();
+                        closePaymentModal();
+                    }, 1500);
+                } else {
+                    throw new Error(result.message || 'Failed to add payment account');
+                }
+                
+            } catch (error) {
+                console.error('Error adding payment account:', error);
+                responseDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">Error!</p>
+                                <p class="text-sm text-red-700 mt-1">${error.message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                // Hide loading
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        function refreshAll() {
+            location.reload();
+        }
+
+        function loadStats() {
+            // Load users to calculate total users
+            fetch('/api/admin/users')
+                .then(response => response.json())
+                .then(usersData => {
+                    if (usersData.status === 'success') {
+                        updateStatsCard('Total Users', usersData.data.length, 'fa-users', 'text-blue-600');
+                    }
+                })
+                .catch(e => console.error('Error loading users stats:', e));
+
+            // Load transactions to calculate pending payments and revenue
+            fetch('/api/admin/transactions')
+                .then(response => response.json())
+                .then(transactionsData => {
+                    if (transactionsData.status === 'success') {
+                        const transactions = transactionsData.data;
+                        const pendingCount = transactions.filter(t => t.status === 'pending').length;
+                        const totalRevenue = transactions
+                            .filter(t => t.status === 'approved')
+                            .reduce((sum, t) => sum + t.amount, 0);
+                        
+                        updateStatsCard('Pending Payments', pendingCount, 'fa-clock', 'text-yellow-600');
+                        updateStatsCard('Total Revenue', totalRevenue.toLocaleString() + ' MMK', 'fa-dollar-sign', 'text-green-600');
+                    }
+                })
+                .catch(e => console.error('Error loading transactions stats:', e));
+
+            // Load images count
+            fetch('/api/images')
+                .then(response => response.json())
+                .then(imagesData => {
+                    if (imagesData.status === 'success') {
+                        updateStatsCard('Images Processed', imagesData.data.length, 'fa-image', 'text-purple-600');
+                    }
+                })
+                .catch(e => console.error('Error loading images stats:', e));
+        }
+
+        function updateStatsCard(title, value, icon, iconColor) {
+            const statsContainer = document.getElementById('stats-container');
+            const existingCards = statsContainer.querySelectorAll('.stat-card');
+            
+            // Find the card with this title and update it
+            for (let card of existingCards) {
+                const cardTitle = card.querySelector('dt').textContent;
+                if (cardTitle === title) {
+                    const valueElement = card.querySelector('dd');
+                    const iconElement = card.querySelector('i');
+                    
+                    valueElement.textContent = value;
+                    iconElement.className = `fas ${icon} ${iconColor} text-2xl`;
+                    return;
+                }
+            }
+        }
+
+        function renderRecentTransactions(transactions) {
+            if (!transactions || transactions.length === 0) {
+                return `
+                    <div class="text-center py-8">
+                        <i class="fas fa-receipt text-gray-300 text-3xl mb-2"></i>
+                        <p class="text-gray-500">No recent transactions</p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="space-y-4">
+                    ${transactions.slice(0, 5).map(transaction => `
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 flex items-center justify-center">
+                                        <span class="text-xs font-medium text-white">${transaction.device_id.slice(0, 2).toUpperCase()}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">${transaction.transaction_id}</p>
+                                    <p class="text-xs text-gray-500">${transaction.device_id}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900">${transaction.amount.toLocaleString()} MMK</p>
+                                <div class="text-xs">${getStatusBadge(transaction.status)}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="pt-3 border-t border-gray-200">
+                        <button onclick="showTab('transactions')" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">
+                            View all transactions →
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRecentUsers(users) {
+            if (!users || users.length === 0) {
+                return `
+                    <div class="text-center py-8">
+                        <i class="fas fa-users text-gray-300 text-3xl mb-2"></i>
+                        <p class="text-gray-500">No recent users</p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="space-y-4">
+                    ${users.slice(0, 5).map(user => `
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center">
+                                        <span class="text-xs font-medium text-white">${user.device_id.slice(0, 2).toUpperCase()}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">${user.device_id}</p>
+                                    <p class="text-xs text-gray-500">Created ${new Date(user.created_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900">${user.credits} credits</p>
+                                <p class="text-xs text-gray-500">${user.total_photos} photos</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="pt-3 border-t border-gray-200">
+                        <button onclick="showTab('users')" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">
+                            View all users →
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadCurrentSettings() {
+            // Load current settings into form
+            fetch('/api/admin/settings')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const settings = data.data;
+                        document.getElementById('credits_per_photo').value = settings.credits_per_photo;
+                        document.getElementById('credit_price_mmk').value = settings.credit_price_mmk;
+                        document.getElementById('free_photos_limit').value = settings.free_photos_limit;
+                        document.getElementById('minimum_purchase').value = settings.minimum_purchase;
+                    }
+                })
+                .catch(e => console.error('Error parsing settings:', e));
+        }
+
+        function filterTransactions(status) {
+            const url = status === 'all' ? '/api/admin/transactions' : `/api/admin/transactions?status=${status}`;
+            htmx.ajax('GET', url, '#transactions-content');
+        }
+
+        // Users Management Functions
+        let usersData = [];
+
+        function refreshUsers() {
+            htmx.ajax('GET', '/api/admin/users', '#users-content');
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const filteredUsers = usersData.filter(user => 
+                user.device_id.toLowerCase().includes(searchTerm) ||
+                user.id.toLowerCase().includes(searchTerm) ||
+                user.credits.toString().includes(searchTerm)
+            );
+            renderUsersTable(filteredUsers);
+        }
+
+        function sortUsers() {
+            const sortBy = document.getElementById('sortBy').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            const sortedUsers = [...usersData].sort((a, b) => {
+                let aVal = a[sortBy];
+                let bVal = b[sortBy];
+                
+                if (sortBy === 'created_at' || sortBy === 'last_active_at') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                }
+                
+                if (sortOrder === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            renderUsersTable(sortedUsers);
+        }
+
+        function exportUsers() {
+            const csvContent = [
+                ['Device ID', 'User ID', 'Credits', 'Free Photos', 'Total Photos', 'Created At', 'Last Active'],
+                ...usersData.map(user => [
+                    user.device_id,
+                    user.id,
+                    user.credits,
+                    user.free_photos,
+                    user.total_photos,
+                    new Date(user.created_at).toLocaleDateString(),
+                    new Date(user.last_active_at).toLocaleDateString()
+                ])
+            ].map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function renderUsersTable(users) {
+            const content = `
+                <div class="overflow-hidden">
+                    <!-- Stats Row -->
+                    <div class="px-4 py-4 bg-gray-50 border-b border-gray-200">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-users text-blue-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Total Users</p>
+                                        <p class="text-lg font-semibold text-gray-900">${users.length}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-coins text-green-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Total Credits</p>
+                                        <p class="text-lg font-semibold text-gray-900">${users.reduce((sum, user) => sum + user.credits, 0)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-purple-100 rounded-lg">
+                                        <i class="fas fa-images text-purple-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Total Photos</p>
+                                        <p class="text-lg font-semibold text-gray-900">${users.reduce((sum, user) => sum + user.total_photos, 0)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-yellow-100 rounded-lg">
+                                        <i class="fas fa-chart-line text-yellow-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Avg Credits</p>
+                                        <p class="text-lg font-semibold text-gray-900">${users.length > 0 ? Math.round(users.reduce((sum, user) => sum + user.credits, 0) / users.length) : 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photos</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${users.map(user => `
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center">
+                                                        <span class="text-sm font-medium text-white">${user.device_id.slice(0, 2).toUpperCase()}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">${user.device_id}</div>
+                                                    <div class="text-sm text-gray-500">ID: ${user.id}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.credits > 20 ? 'bg-green-100 text-green-800' : user.credits > 5 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                                                        <i class="fas fa-coins mr-1"></i>
+                                                        ${user.credits}
+                                                    </span>
+                                                </div>
+                                                <div class="ml-2 text-sm text-gray-500">credits</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="font-medium">${user.total_photos}</span>
+                                                    <span class="text-gray-500">total</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="text-green-600 font-medium">${user.free_photos}</span>
+                                                    <span class="text-gray-500 text-xs">free</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">
+                                                <div class="flex items-center space-x-1">
+                                                    <i class="fas fa-calendar-plus text-gray-400"></i>
+                                                    <span>${new Date(user.created_at).toLocaleDateString()}</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1 mt-1">
+                                                    <i class="fas fa-clock text-gray-400"></i>
+                                                    <span class="text-sm text-gray-500">${formatTimeAgo(user.last_active_at)}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            ${isRecentlyActive(user.last_active_at) 
+                                                ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><span class="w-2 h-2 bg-green-400 rounded-full mr-1"></span>Active</span>'
+                                                : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"><span class="w-2 h-2 bg-gray-400 rounded-full mr-1"></span>Inactive</span>'
+                                            }
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center space-x-2">
+                                                <button onclick="viewUserDetails('${user.id}')" class="text-indigo-600 hover:text-indigo-900 p-1 rounded">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button onclick="editUserCredits('${user.id}')" class="text-green-600 hover:text-green-900 p-1 rounded">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button onclick="deleteUser('${user.id}')" class="text-red-600 hover:text-red-900 p-1 rounded">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    ${users.length === 0 ? `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                                <i class="fas fa-users text-gray-400 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Users Found</h3>
+                            <p class="text-gray-500">No users match your current search criteria.</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('users-content').innerHTML = content;
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffHours < 1) return 'Less than 1 hour ago';
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            if (diffDays < 7) return `${diffDays} days ago`;
+            return date.toLocaleDateString();
+        }
+
+        function isRecentlyActive(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            return diffHours < 24; // Active if last active within 24 hours
+        }
+
+        function viewUserDetails(userId) {
+            alert(`View details for user: ${userId}`);
+            // Implement user details modal
+        }
+
+        function editUserCredits(userId) {
+            const newCredits = prompt(`Enter new credit amount for user ${userId}:`);
+            if (newCredits && !isNaN(newCredits)) {
+                // Implement credit update API call
+                alert(`Credits updated for user ${userId}: ${newCredits}`);
+            }
+        }
+
+        function deleteUser(userId) {
+            if (confirm(`Are you sure you want to delete user ${userId}? This action cannot be undone.`)) {
+                // Implement user deletion API call
+                alert(`User ${userId} deleted`);
+            }
+        }
+
+        // Transactions Management Functions
+        let transactionsData = [];
+
+        function refreshTransactions() {
+            htmx.ajax('GET', '/api/admin/transactions', '#transactions-content');
+        }
+
+        function filterTransactionsList() {
+            const searchTerm = document.getElementById('transactionSearch').value.toLowerCase();
+            const filteredTransactions = transactionsData.filter(transaction => 
+                transaction.transaction_id.toLowerCase().includes(searchTerm) ||
+                transaction.device_id.toLowerCase().includes(searchTerm) ||
+                transaction.amount_mmk.toString().includes(searchTerm)
+            );
+            renderTransactionsTable(filteredTransactions);
+        }
+
+        function sortTransactions() {
+            const sortBy = document.getElementById('transactionSortBy').value;
+            const sortOrder = document.getElementById('transactionSortOrder').value;
+            
+            const sortedTransactions = [...transactionsData].sort((a, b) => {
+                let aVal = a[sortBy];
+                let bVal = b[sortBy];
+                
+                if (sortBy === 'created_at') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                }
+                
+                if (sortOrder === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            renderTransactionsTable(sortedTransactions);
+        }
+
+        function renderTransactionsTable(transactions) {
+            const statusCounts = transactions.reduce((acc, t) => {
+                acc[t.status] = (acc[t.status] || 0) + 1;
+                return acc;
+            }, {});
+
+            const content = `
+                <div class="overflow-hidden">
+                    <!-- Stats Row -->
+                    <div class="px-4 py-4 bg-gray-50 border-b border-gray-200">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-yellow-100 rounded-lg">
+                                        <i class="fas fa-clock text-yellow-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Pending</p>
+                                        <p class="text-lg font-semibold text-gray-900">${statusCounts.pending || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-check text-green-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Approved</p>
+                                        <p class="text-lg font-semibold text-gray-900">${statusCounts.approved || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-red-100 rounded-lg">
+                                        <i class="fas fa-times text-red-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Rejected</p>
+                                        <p class="text-lg font-semibold text-gray-900">${statusCounts.rejected || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-dollar-sign text-blue-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Total Amount</p>
+                                        <p class="text-lg font-semibold text-gray-900">${transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transactions Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${transactions.map(transaction => `
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900">${transaction.transaction_id}</div>
+                                            <div class="text-sm text-gray-500">Credits: ${transaction.credits}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8">
+                                                    <div class="h-8 w-8 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 flex items-center justify-center">
+                                                        <span class="text-xs font-medium text-white">${transaction.device_id.slice(0, 2).toUpperCase()}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">${transaction.device_id}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900">${transaction.amount.toLocaleString()} MMK</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">${transaction.payment_method}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            ${getStatusBadge(transaction.status)}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            ${formatDate(transaction.created_at)}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            ${transaction.status === 'pending' ? `
+                                                <div class="flex items-center space-x-2">
+                                                    <button onclick="approveTransaction('${transaction.id}')" class="text-green-600 hover:text-green-900 p-1 rounded">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button onclick="rejectTransaction('${transaction.id}')" class="text-red-600 hover:text-red-900 p-1 rounded">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            ` : ''}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    ${transactions.length === 0 ? `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                                <i class="fas fa-receipt text-gray-400 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Transactions Found</h3>
+                            <p class="text-gray-500">No transactions match your current search criteria.</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('transactions-content').innerHTML = content;
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"><span class="w-2 h-2 bg-yellow-400 rounded-full mr-1"></span>Pending</span>',
+                'approved': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><span class="w-2 h-2 bg-green-400 rounded-full mr-1"></span>Approved</span>',
+                'rejected': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><span class="w-2 h-2 bg-red-400 rounded-full mr-1"></span>Rejected</span>'
+            };
+            return badges[status] || status;
+        }
+
+        function approveTransaction(transactionId) {
+            if (confirm(`Approve transaction ${transactionId}?`)) {
+                fetch(`/api/admin/transactions/${transactionId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(`Transaction ${transactionId} approved successfully`);
+                        // Refresh the transactions list
+                        refreshTransactions();
+                    } else {
+                        alert(`Failed to approve transaction: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(`Error approving transaction: ${error.message}`);
+                });
+            }
+        }
+
+        function rejectTransaction(transactionId) {
+            if (confirm(`Reject transaction ${transactionId}?`)) {
+                fetch(`/api/admin/transactions/${transactionId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(`Transaction ${transactionId} rejected successfully`);
+                        // Refresh the transactions list
+                        refreshTransactions();
+                    } else {
+                        alert(`Failed to reject transaction: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(`Error rejecting transaction: ${error.message}`);
+                });
+            }
+        }
+
+        // Credit Packages Management Functions
+        let packagesData = [];
+
+        function refreshPackages() {
+            htmx.ajax('GET', '/api/admin/credit-packages', '#packages-content');
+        }
+
+        function filterPackages() {
+            const searchTerm = document.getElementById('packageSearch').value.toLowerCase();
+            const filteredPackages = packagesData.filter(pkg => 
+                pkg.name.toLowerCase().includes(searchTerm) ||
+                pkg.credits.toString().includes(searchTerm) ||
+                pkg.price_mmk.toString().includes(searchTerm)
+            );
+            renderPackagesTable(filteredPackages);
+        }
+
+        function sortPackages() {
+            const sortBy = document.getElementById('packageSortBy').value;
+            const sortOrder = document.getElementById('packageSortOrder').value;
+            
+            const sortedPackages = [...packagesData].sort((a, b) => {
+                let aVal = a[sortBy];
+                let bVal = b[sortBy];
+                
+                if (sortBy === 'created_at') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                }
+                
+                if (sortOrder === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            renderPackagesTable(sortedPackages);
+        }
+
+        function renderPackagesTable(packages) {
+            // Ensure packages is an array
+            packages = packages || [];
+            
+            const content = `
+                <div class="overflow-hidden">
+                    <!-- Stats Row -->
+                    <div class="px-4 py-4 bg-gray-50 border-b border-gray-200">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-purple-100 rounded-lg">
+                                        <i class="fas fa-box text-purple-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Total Packages</p>
+                                        <p class="text-lg font-semibold text-gray-900">${packages.length}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-coins text-green-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Total Credits</p>
+                                        <p class="text-lg font-semibold text-gray-900">${packages.reduce((sum, pkg) => sum + pkg.credits, 0)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-dollar-sign text-blue-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Avg Price</p>
+                                        <p class="text-lg font-semibold text-gray-900">${packages.length > 0 ? Math.round(packages.reduce((sum, pkg) => sum + pkg.price_mmk, 0) / packages.length) : 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Packages Grid -->
+                    <div class="p-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            ${packages.map(pkg => `
+                                <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                                    <div class="p-6">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <h3 class="text-lg font-medium text-gray-900">${pkg.name}</h3>
+                                            <div class="flex items-center space-x-2">
+                                                <button onclick="editPackage('${pkg.id}')" class="text-indigo-600 hover:text-indigo-900 p-1 rounded">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button onclick="deletePackage('${pkg.id}')" class="text-red-600 hover:text-red-900 p-1 rounded">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm font-medium text-gray-500">Credits</span>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                                    <i class="fas fa-coins mr-1"></i>
+                                                    ${pkg.credits}
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm font-medium text-gray-500">Price</span>
+                                                <span class="text-lg font-semibold text-gray-900">${pkg.price_mmk.toLocaleString()} MMK</span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm font-medium text-gray-500">Per Credit</span>
+                                                <span class="text-sm text-gray-600">${Math.round(pkg.price_mmk / pkg.credits)} MMK</span>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 pt-4 border-t border-gray-200">
+                                            <div class="flex items-center text-xs text-gray-500">
+                                                <i class="fas fa-calendar mr-1"></i>
+                                                Created ${new Date(pkg.created_at).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    ${packages.length === 0 ? `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                                <i class="fas fa-box text-gray-400 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Credit Packages Found</h3>
+                            <p class="text-gray-500">No packages match your current search criteria.</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('packages-content').innerHTML = content;
+        }
+
+        function editPackage(packageId) {
+            alert(`Edit package: ${packageId}`);
+            // Implement package editing
+        }
+
+        function deletePackage(packageId) {
+            if (confirm(`Are you sure you want to delete this package? This action cannot be undone.`)) {
+                alert(`Package ${packageId} deleted`);
+                // Implement package deletion
+            }
+        }
+
+        // Payment Accounts Management Functions
+        let paymentAccountsData = [];
+
+        function refreshPaymentAccounts() {
+            htmx.ajax('GET', '/api/admin/payment/accounts', '#payment-accounts-content');
+        }
+
+        function filterPaymentAccounts() {
+            const searchTerm = document.getElementById('paymentAccountSearch').value.toLowerCase();
+            const filteredAccounts = paymentAccountsData.filter(account => 
+                account.name.toLowerCase().includes(searchTerm) ||
+                account.payment_method.toLowerCase().includes(searchTerm) ||
+                account.account_number.toLowerCase().includes(searchTerm)
+            );
+            renderPaymentAccountsTable(filteredAccounts);
+        }
+
+        function filterPaymentAccountsByStatus() {
+            const filter = document.getElementById('paymentAccountFilter').value;
+            let filteredAccounts = paymentAccountsData;
+            
+            if (filter !== 'all') {
+                const isActive = filter === 'active';
+                filteredAccounts = paymentAccountsData.filter(account => account.is_active === isActive);
+            }
+            
+            renderPaymentAccountsTable(filteredAccounts);
+        }
+
+        function filterPaymentAccountsByMethod() {
+            const method = document.getElementById('paymentMethodFilter').value;
+            let filteredAccounts = paymentAccountsData;
+            
+            if (method !== 'all') {
+                filteredAccounts = paymentAccountsData.filter(account => account.payment_method === method);
+            }
+            
+            renderPaymentAccountsTable(filteredAccounts);
+        }
+
+        function renderPaymentAccountsTable(accounts) {
+            const activeCount = accounts.filter(acc => acc.is_active).length;
+            const inactiveCount = accounts.length - activeCount;
+
+            const content = `
+                <div class="overflow-hidden">
+                    <!-- Stats Row -->
+                    <div class="px-4 py-4 bg-gray-50 border-b border-gray-200">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-credit-card text-blue-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Total Accounts</p>
+                                        <p class="text-lg font-semibold text-gray-900">${accounts.length}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-check-circle text-green-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Active</p>
+                                        <p class="text-lg font-semibold text-gray-900">${activeCount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-red-100 rounded-lg">
+                                        <i class="fas fa-times-circle text-red-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Inactive</p>
+                                        <p class="text-lg font-semibold text-gray-900">${inactiveCount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-purple-100 rounded-lg">
+                                        <i class="fas fa-mobile-alt text-purple-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-500">Methods</p>
+                                        <p class="text-lg font-semibold text-gray-900">${new Set(accounts.map(acc => acc.method)).size}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Accounts Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Number</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                                    <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${accounts.map(account => `
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-green-400 to-blue-400 flex items-center justify-center">
+                                                        <i class="fas ${getPaymentMethodIcon(account.method)} text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">${account.account_name}</div>
+                                                    <div class="text-sm text-gray-500">ID: ${account.id}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                ${account.method}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900">${account.account_number}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            ${account.is_active 
+                                                ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><span class="w-2 h-2 bg-green-400 rounded-full mr-1"></span>Active</span>'
+                                                : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><span class="w-2 h-2 bg-red-400 rounded-full mr-1"></span>Inactive</span>'
+                                            }
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            ${new Date(account.created_at).toLocaleDateString()}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center space-x-2">
+                                                <button onclick="toggleAccountStatus('${account.id}')" class="text-indigo-600 hover:text-indigo-900 p-1 rounded">
+                                                    <i class="fas fa-toggle-${account.is_active ? 'on' : 'off'}"></i>
+                                                </button>
+                                                <button onclick="editPaymentAccount('${account.id}')" class="text-green-600 hover:text-green-900 p-1 rounded">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button onclick="deletePaymentAccount('${account.id}')" class="text-red-600 hover:text-red-900 p-1 rounded">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    ${accounts.length === 0 ? `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                                <i class="fas fa-credit-card text-gray-400 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Payment Accounts Found</h3>
+                            <p class="text-gray-500">No payment accounts match your current search criteria.</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('payment-accounts-content').innerHTML = content;
+        }
+
+        function getPaymentMethodIcon(method) {
+            const icons = {
+                'kbzpay': 'fa-mobile-alt',
+                'wavepay': 'fa-wallet',
+                'cbpay': 'fa-credit-card',
+                'ayapay': 'fa-university',
+                // Legacy support for display names
+                'KBZ Pay': 'fa-mobile-alt',
+                'Wave Money': 'fa-wallet',
+                'CB Pay': 'fa-credit-card',
+                'AYA Pay': 'fa-university'
+            };
+            return icons[method] || 'fa-credit-card';
+        }
+
+        function toggleAccountStatus(accountId) {
+            if (confirm(`Toggle status for account ${accountId}?`)) {
+                alert(`Account ${accountId} status toggled`);
+                // Implement status toggle API call
+            }
+        }
+
+        async function editPaymentAccount(accountId) {
+            try {
+                // Fetch account details
+                const response = await fetch('/api/admin/payment/accounts');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const account = result.data.find(acc => acc.id === accountId);
+                    if (account) {
+                        // Populate edit form
+                        document.getElementById('editAccountId').value = account.id;
+                        document.getElementById('editPaymentMethod').value = account.method;
+                        document.getElementById('editPaymentAccountName').value = account.account_name;
+                        document.getElementById('editPaymentAccountNumber').value = account.account_number;
+                        document.getElementById('editPaymentQRCode').value = account.qr_code || '';
+                        
+                        // Open edit modal
+                        openEditPaymentModal();
+                    } else {
+                        alert('Account not found');
+                    }
+                } else {
+                    alert('Failed to load account details');
+                }
+            } catch (error) {
+                console.error('Error loading account for editing:', error);
+                alert('Error loading account details');
+            }
+        }
+
+        async function updatePaymentAccount(event) {
+            event.preventDefault();
+            
+            const loadingIndicator = document.getElementById('edit-payment-loading');
+            const responseDiv = document.getElementById('edit-payment-modal-response');
+            const accountId = document.getElementById('editAccountId').value;
+            
+            try {
+                // Show loading
+                loadingIndicator.classList.remove('hidden');
+                responseDiv.innerHTML = '';
+                
+                // Collect form data
+                const accountData = {
+                    method: document.getElementById('editPaymentMethod').value.trim(),
+                    account_name: document.getElementById('editPaymentAccountName').value.trim(),
+                    account_number: document.getElementById('editPaymentAccountNumber').value.trim(),
+                    qr_code: document.getElementById('editPaymentQRCode').value.trim()
+                };
+                
+                console.log('Updating payment account:', accountId, accountData);
+                
+                // Send request
+                const response = await fetch(`/api/admin/payment/accounts/${accountId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(accountData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    responseDiv.innerHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-green-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-green-800">Success!</p>
+                                    <p class="text-sm text-green-700 mt-1">${result.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Refresh payment accounts list
+                    setTimeout(() => {
+                        refreshPaymentAccounts();
+                        closeEditPaymentModal();
+                    }, 1500);
+                } else {
+                    throw new Error(result.message || 'Failed to update payment account');
+                }
+                
+            } catch (error) {
+                console.error('Error updating payment account:', error);
+                responseDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">Error!</p>
+                                <p class="text-sm text-red-700 mt-1">${error.message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                // Hide loading
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        async function deletePaymentAccount(accountId) {
+            if (confirm(`Are you sure you want to delete this payment account? This action cannot be undone.`)) {
+                try {
+                    const response = await fetch(`/api/admin/payment/accounts/${accountId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.status === 'success') {
+                        alert('Payment account deleted successfully');
+                        refreshPaymentAccounts();
+                    } else {
+                        throw new Error(result.message || 'Failed to delete payment account');
+                    }
+                } catch (error) {
+                    console.error('Error deleting payment account:', error);
+                    alert(`Error deleting payment account: ${error.message}`);
+                }
+            }
+        }
+
+        // Settings Management Functions
+        // Settings Management Functions
+        let currentSystemSettings = null;
+
+        async function loadCurrentSettings() {
+            try {
+                const response = await fetch('/api/admin/settings');
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    currentSystemSettings = result.data.settings;
+                    populateSettingsForm(currentSystemSettings);
+                    renderCurrentSettings(currentSystemSettings);
+                } else {
+                    throw new Error(result.message || 'Failed to load settings');
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                alert(`Error loading settings: ${error.message}`);
+            }
+        }
+
+        function populateSettingsForm(settings) {
+            document.getElementById('credits_per_photo').value = settings.credits_per_photo;
+            document.getElementById('credit_price_mmk').value = settings.credit_price_mmk;
+            document.getElementById('free_photos_limit').value = settings.free_photos_limit;
+            document.getElementById('minimum_purchase').value = settings.minimum_purchase;
+        }
+
+        function renderCurrentSettings(settings) {
+            const photoPrice = settings.credits_per_photo * settings.credit_price_mmk;
+            const content = `
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="bg-gradient-to-r from-green-400 to-green-600 rounded-lg p-4 text-white">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-white bg-opacity-30 rounded-lg">
+                                <i class="fas fa-coins text-lg"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium opacity-90">Credits per Photo</p>
+                                <p class="text-xl font-bold">${settings.credits_per_photo}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg p-4 text-white">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-white bg-opacity-30 rounded-lg">
+                                <i class="fas fa-dollar-sign text-lg"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium opacity-90">Credit Price</p>
+                                <p class="text-xl font-bold">${settings.credit_price_mmk} MMK</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-purple-400 to-purple-600 rounded-lg p-4 text-white">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-white bg-opacity-30 rounded-lg">
+                                <i class="fas fa-camera text-lg"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium opacity-90">Photo Price</p>
+                                <p class="text-xl font-bold">${photoPrice} MMK</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg p-4 text-white">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-white bg-opacity-30 rounded-lg">
+                                <i class="fas fa-gift text-lg"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium opacity-90">Free Photos</p>
+                                <p class="text-xl font-bold">${settings.free_photos_limit}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">💰 Minimum Purchase</h4>
+                        <p class="text-2xl font-bold text-gray-700">${settings.minimum_purchase} MMK</p>
+                        <p class="text-sm text-gray-500 mt-1">Minimum transaction amount</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">⏰ Last Updated</h4>
+                        <p class="text-sm text-gray-700">${new Date(settings.updated_at).toLocaleString()}</p>
+                        <p class="text-sm text-gray-500 mt-1">System configuration timestamp</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('current-settings').innerHTML = content;
+        }
+
+        async function updateSystemSettings(event) {
+            event.preventDefault();
+            
+            const loadingIndicator = document.getElementById('settings-loading');
+            const responseDiv = document.getElementById('settings-response');
+            
+            try {
+                // Show loading
+                loadingIndicator.classList.remove('hidden');
+                responseDiv.innerHTML = '';
+                
+                // Collect form data
+                const settingsData = {
+                    credits_per_photo: parseInt(document.getElementById('credits_per_photo').value),
+                    credit_price_mmk: parseInt(document.getElementById('credit_price_mmk').value),
+                    free_photos_limit: parseInt(document.getElementById('free_photos_limit').value),
+                    minimum_purchase: parseInt(document.getElementById('minimum_purchase').value)
+                };
+                
+                console.log('Updating system settings:', settingsData);
+                
+                // Send request
+                const response = await fetch('/api/admin/settings', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settingsData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    responseDiv.innerHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-green-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-green-800">Success!</p>
+                                    <p class="text-sm text-green-700 mt-1">${result.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Update current settings display
+                    currentSystemSettings = result.data.settings;
+                    renderCurrentSettings(currentSystemSettings);
+                    
+                    // Clear response after delay
+                    setTimeout(() => {
+                        responseDiv.innerHTML = '';
+                    }, 3000);
+                } else {
+                    throw new Error(result.message || 'Failed to update settings');
+                }
+                
+            } catch (error) {
+                console.error('Error updating settings:', error);
+                responseDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">Error!</p>
+                                <p class="text-sm text-red-700 mt-1">${error.message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                // Hide loading
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        function resetSettings() {
+            if (confirm('Reset all settings to current values from server?')) {
+                if (currentSystemSettings) {
+                    populateSettingsForm(currentSystemSettings);
+                } else {
+                    loadCurrentSettings();
+                }
+            }
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', openMobileSidebar);
+        document.getElementById('close-sidebar').addEventListener('click', closeMobileSidebar);
+
+        // HTMX event handlers
+        document.body.addEventListener('htmx:afterRequest', function(event) {
+            if (event.detail.target.id === 'package-modal-response' && event.detail.xhr.status === 200) {
+                closePackageModal();
+                htmx.ajax('GET', '/api/admin/credit-packages', '#packages-content');
+            }
+            if (event.detail.target.id === 'payment-modal-response' && event.detail.xhr.status === 200) {
+                closePaymentModal();
+                htmx.ajax('GET', '/api/admin/payment/accounts', '#payment-accounts-content');
+            }
+            
+            // Handle recent transactions data for overview
+            if (event.detail.target.id === 'recent-transactions' && event.detail.xhr.status === 200) {
+                console.log('Recent transactions response:', event.detail.xhr.responseText);
+                try {
+                    const response = JSON.parse(event.detail.xhr.responseText);
+                    console.log('Parsed transactions response:', response);
+                    if (response.status === 'success' && response.data) {
+                        const content = renderRecentTransactions(response.data);
+                        document.getElementById('recent-transactions').innerHTML = content;
+                    } else {
+                        console.log('No transactions data or unsuccessful response');
+                        document.getElementById('recent-transactions').innerHTML = `
+                            <div class="text-center py-8">
+                                <i class="fas fa-info-circle text-blue-400 text-2xl mb-2"></i>
+                                <p class="text-gray-500">No transactions available</p>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    console.error('Error parsing recent transactions:', e);
+                    document.getElementById('recent-transactions').innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-2xl mb-2"></i>
+                            <p class="text-gray-500">Error loading transactions</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Handle recent users data for overview
+            if (event.detail.target.id === 'recent-users' && event.detail.xhr.status === 200) {
+                console.log('Recent users response:', event.detail.xhr.responseText);
+                try {
+                    const response = JSON.parse(event.detail.xhr.responseText);
+                    console.log('Parsed users response:', response);
+                    if (response.status === 'success' && response.data) {
+                        const content = renderRecentUsers(response.data);
+                        document.getElementById('recent-users').innerHTML = content;
+                    } else {
+                        console.log('No users data or unsuccessful response');
+                        document.getElementById('recent-users').innerHTML = `
+                            <div class="text-center py-8">
+                                <i class="fas fa-info-circle text-blue-400 text-2xl mb-2"></i>
+                                <p class="text-gray-500">No users available</p>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    console.error('Error parsing recent users:', e);
+                    document.getElementById('recent-users').innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-2xl mb-2"></i>
+                            <p class="text-gray-500">Error loading users</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Handle users data response
+            if (event.detail.target.id === 'users-content' && event.detail.xhr.status === 200) {
+                try {
+                    const response = JSON.parse(event.detail.xhr.responseText);
+                    if (response.status === 'success' && response.data) {
+                        usersData = response.data;
+                        renderUsersTable(usersData);
+                    }
+                } catch (e) {
+                    console.error('Error parsing users response:', e);
+                    document.getElementById('users-content').innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Users</h3>
+                            <p class="text-gray-500">Failed to load user data. Please try refreshing the page.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Handle transactions data response
+            if (event.detail.target.id === 'transactions-content' && event.detail.xhr.status === 200) {
+                console.log('Transactions content response:', event.detail.xhr.responseText);
+                try {
+                    const response = JSON.parse(event.detail.xhr.responseText);
+                    console.log('Parsed transactions content response:', response);
+                    if (response.status === 'success' && response.data) {
+                        transactionsData = response.data;
+                        renderTransactionsTable(transactionsData);
+                    } else {
+                        console.log('No transactions data or unsuccessful response for content');
+                        document.getElementById('transactions-content').innerHTML = `
+                            <div class="text-center py-12">
+                                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                                    <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No Transactions</h3>
+                                <p class="text-gray-500">No transactions found in the system.</p>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    console.error('Error parsing transactions response:', e);
+                    document.getElementById('transactions-content').innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Transactions</h3>
+                            <p class="text-gray-500">Failed to load transaction data. Please try refreshing the page.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Handle packages data response
+            if (event.detail.target.id === 'packages-content' && event.detail.xhr.status === 200) {
+                try {
+                    console.log('Packages response:', event.detail.xhr.responseText);
+                    const response = JSON.parse(event.detail.xhr.responseText);
+                    console.log('Parsed packages response:', response);
+                    if (response.status === 'success' && response.data !== undefined) {
+                        packagesData = response.data || []; // Handle null data
+                        console.log('Packages data:', packagesData);
+                        renderPackagesTable(packagesData);
+                    } else {
+                        console.error('Invalid packages response structure:', response);
+                    }
+                } catch (e) {
+                    console.error('Error parsing packages response:', e);
+                    document.getElementById('packages-content').innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Packages</h3>
+                            <p class="text-gray-500">Failed to load package data. Please try refreshing the page.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Handle payment accounts data response
+            if (event.detail.target.id === 'payment-accounts-content' && event.detail.xhr.status === 200) {
+                try {
+                    const response = JSON.parse(event.detail.xhr.responseText);
+                    if (response.status === 'success' && response.data && response.data.accounts) {
+                        paymentAccountsData = response.data.accounts;
+                        renderPaymentAccountsTable(paymentAccountsData);
+                    }
+                } catch (e) {
+                    console.error('Error parsing payment accounts response:', e);
+                    document.getElementById('payment-accounts-content').innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Payment Accounts</h3>
+                            <p class="text-gray-500">Failed to load payment account data. Please try refreshing the page.</p>
+                        </div>
+                    `;
+                }
+            }
+        });
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load stats on page load
+            setTimeout(loadStats, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -5,19 +5,872 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ImageLabel Admin Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .card { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { background: #2196F3; color: white; padding: 20px; text-align: center; border-radius: 8px; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-card { background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-number { font-size: 2em; font-weight: bold; color: #1976D2; }
-        .transactions { margin-top: 20px; }
-        .transaction { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .pending { border-left: 4px solid #ff9800; }
-        .approved { border-left: 4px solid #4caf50; }
-        .rejected { border-left: 4px solid #f44336; }
-        .btn { padding: 8px 16px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            color: #333;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { 
+            background: rgba(255,255,255,0.95); 
+            padding: 30px; 
+            text-align: center; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        .header h1 { color: #2c3e50; font-size: 2.5em; margin-bottom: 10px; }
+        .header p { color: #7f8c8d; font-size: 1.1em; }
+        
+        .nav-tabs {
+            display: flex;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #7f8c8d;
+        }
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+        }
+        .nav-tab:hover:not(.active) {
+            background: rgba(102,126,234,0.1);
+            color: #667eea;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card { 
+            background: rgba(255,255,255,0.95); 
+            padding: 25px; 
+            margin: 15px 0; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px;
+        }
+        .stat-card { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px; 
+            border-radius: 15px; 
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-number { font-size: 3em; font-weight: bold; margin-bottom: 10px; }
+        .stat-label { font-size: 1.1em; opacity: 0.9; }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .data-table tr:hover {
+            background: rgba(102,126,234,0.05);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .setting-display {
+            margin: 20px 0;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        .setting-item strong {
+            color: #2c3e50;
+        }
+        .setting-item span {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: #000; }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-info { background: #cce7ff; color: #004085; border: 1px solid #b6d7ff; }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .grid-2 { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .nav-tabs { flex-direction: column; }
+            .stats { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .data-table { font-size: 14px; }
+            .data-table th, .data-table td { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 ImageLabel Admin Dashboard</h1>
+            <p>Manage users, transactions, and payment accounts with SQLite database</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('overview')">📊 Overview</button>
+            <button class="nav-tab" onclick="switchTab('transactions')">💳 Transactions</button>
+            <button class="nav-tab" onclick="switchTab('users')">👥 Users</button>
+            <button class="nav-tab" onclick="switchTab('payments')">🏦 Payment Accounts</button>
+            <button class="nav-tab" onclick="switchTab('images')">🖼️ Images</button>
+            <button class="nav-tab" onclick="switchTab('settings')">⚙️ Settings</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingTransactions">0</div>
+                    <div class="stat-label">Pending Payments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalImages">0</div>
+                    <div class="stat-label">Total Images</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeAccounts">0</div>
+                    <div class="stat-label">Active Payment Accounts</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📈 System Status</h3>
+                <div id="systemStatus">
+                    <div class="alert alert-info">
+                        <strong>Database:</strong> SQLite connected and operational
+                    </div>
+                    <div class="alert alert-success">
+                        <strong>Server:</strong> Running on port 8080
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Tab -->
+        <div id="transactions" class="tab-content">
+            <div class="card">
+                <h3>💳 Payment Transactions</h3>
+                <button class="btn btn-primary" onclick="refreshTransactions()">🔄 Refresh</button>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Device ID</th>
+                            <th>Amount (MMK)</th>
+                            <th>Credits</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTable">
+                        <tr><td colspan="8" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-content">
+            <div class="card">
+                <h3>👥 User Management</h3>
+                <button class="btn btn-primary" onclick="refreshUsers()">🔄 Refresh</button>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Device ID</th>
+                            <th>User ID</th>
+                            <th>Free Photos</th>
+                            <th>Credits</th>
+                            <th>Total Photos</th>
+                            <th>Created</th>
+                            <th>Last Active</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment Accounts Tab -->
+        <div id="payments" class="tab-content">
+            <div class="card">
+                <h3>🏦 Payment Account Management</h3>
+                <button class="btn btn-success" onclick="showAddPaymentModal()">➕ Add Payment Account</button>
+                <button class="btn btn-primary" onclick="refreshPaymentAccounts()">🔄 Refresh</button>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Account Name</th>
+                            <th>Account Number</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentAccountsTable">
+                        <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Images Tab -->
+        <div id="images" class="tab-content">
+            <div class="card">
+                <h3>🖼️ Image Management</h3>
+                <button class="btn btn-primary" onclick="refreshImages()">🔄 Refresh</button>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Image ID</th>
+                            <th>Device ID</th>
+                            <th>Name</th>
+                            <th>Labels</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="imagesTable">
+                        <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h3>⚙️ System Settings</h3>
+                <p>Configure dynamic pricing and system parameters</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+                    <!-- Current Settings Display -->
+                    <div class="card" style="padding: 20px;">
+                        <h4>📊 Current Settings</h4>
+                        <div class="setting-display">
+                            <div class="setting-item">
+                                <strong>Credits per Photo:</strong>
+                                <span id="currentCreditsPerPhoto">10</span> credits
+                            </div>
+                            <div class="setting-item">
+                                <strong>Credit Price:</strong>
+                                <span id="currentCreditPrice">100</span> MMK per credit
+                            </div>
+                            <div class="setting-item">
+                                <strong>Photo Price:</strong>
+                                <span id="currentPhotoPrice">1000</span> MMK per photo
+                            </div>
+                            <div class="setting-item">
+                                <strong>Free Photos Limit:</strong>
+                                <span id="currentFreePhotos">5</span> photos
+                            </div>
+                            <div class="setting-item">
+                                <strong>Minimum Purchase:</strong>
+                                <span id="currentMinPurchase">1000</span> MMK
+                            </div>
+                            <div class="setting-item">
+                                <strong>Last Updated:</strong>
+                                <span id="lastUpdated">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Update Form -->
+                    <div class="card" style="padding: 20px;">
+                        <h4>✏️ Update Settings</h4>
+                        <form id="settingsForm">
+                            <div class="form-group">
+                                <label for="creditsPerPhoto">Credits per Photo:</label>
+                                <input type="number" id="creditsPerPhoto" min="1" placeholder="10" required>
+                                <small>How many credits does one photo cost?</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="creditPrice">Credit Price (MMK):</label>
+                                <input type="number" id="creditPrice" min="1" placeholder="100" required>
+                                <small>Price of one credit in Myanmar Kyat</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="freePhotosLimit">Free Photos Limit:</label>
+                                <input type="number" id="freePhotosLimit" min="0" placeholder="5" required>
+                                <small>Number of free photos for new users</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="minimumPurchase">Minimum Purchase (MMK):</label>
+                                <input type="number" id="minimumPurchase" min="100" placeholder="1000" required>
+                                <small>Minimum amount users can purchase</small>
+                            </div>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <button type="submit" class="btn btn-primary">💾 Update Settings</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadCurrentSettings()">🔄 Reset Form</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Payment Account Modal -->
+    <div id="addPaymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddPaymentModal()">&times;</span>
+            <h3>➕ Add Payment Account</h3>
+            <form id="addPaymentForm">
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Provider:</label>
+                    <select id="paymentMethod" required>
+                        <option value="">Select Provider</option>
+                        <option value="KBZPay">KBZ Pay</option>
+                        <option value="WavePay">Wave Pay</option>
+                        <option value="AYAPay">AYA Pay</option>
+                        <option value="CBPay">CB Pay</option>
+                        <option value="UABPay">UAB Pay</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="accountName">Account Name:</label>
+                    <input type="text" id="accountName" placeholder="Enter account holder name" required>
+                </div>
+                <div class="form-group">
+                    <label for="accountNumber">Account Number:</label>
+                    <input type="text" id="accountNumber" placeholder="Enter account number" required>
+                </div>
+                <div class="form-group">
+                    <label for="qrCode">QR Code (Optional):</label>
+                    <textarea id="qrCode" placeholder="Enter QR code data or leave empty"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">💾 Save Payment Account</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddPaymentModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentData = {
+            users: [],
+            transactions: [],
+            paymentAccounts: [],
+            images: []
+        };
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            setInterval(loadDashboard, 30000); // Auto-refresh every 30 seconds
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Load specific data for the tab
+            switch(tabName) {
+                case 'transactions': refreshTransactions(); break;
+                case 'users': refreshUsers(); break;
+                case 'payments': refreshPaymentAccounts(); break;
+                case 'images': refreshImages(); break;
+                case 'settings': loadSettings(); loadCurrentSettings(); break;
+            }
+        }
+
+        // Load all dashboard data
+        async function loadDashboard() {
+            try {
+                await Promise.all([
+                    loadUsers(),
+                    loadTransactions(), 
+                    loadPaymentAccounts(),
+                    loadImages()
+                ]);
+                updateStats();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showAlert('Error loading dashboard data', 'error');
+            }
+        }
+
+        // Load users data
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                currentData.users = data.data || [];
+                updateUsersTable();
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        // Load transactions data
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/api/admin/transactions');
+                const data = await response.json();
+                currentData.transactions = data.data || [];
+                updateTransactionsTable();
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        // Load payment accounts data
+        async function loadPaymentAccounts() {
+            try {
+                const response = await fetch('/api/admin/payment/accounts');
+                const data = await response.json();
+                currentData.paymentAccounts = data.data.accounts || [];
+                updatePaymentAccountsTable();
+            } catch (error) {
+                console.error('Error loading payment accounts:', error);
+            }
+        }
+
+        // Load images data
+        async function loadImages() {
+            try {
+                const response = await fetch('/api/images');
+                const data = await response.json();
+                currentData.images = data.data || [];
+                updateImagesTable();
+            } catch (error) {
+                console.error('Error loading images:', error);
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalUsers').textContent = currentData.users.length;
+            document.getElementById('pendingTransactions').textContent = 
+                currentData.transactions.filter(t => t.status === 'pending').length;
+            document.getElementById('totalImages').textContent = currentData.images.length;
+            document.getElementById('activeAccounts').textContent = 
+                currentData.paymentAccounts.filter(a => a.is_active).length;
+        }
+
+        // Update users table
+        function updateUsersTable() {
+            const tbody = document.getElementById('usersTable');
+            if (currentData.users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentData.users.map(user => `
+                <tr>
+                    <td><code>${user.device_id}</code></td>
+                    <td>${user.id}</td>
+                    <td><span class="status-badge ${user.free_photos > 0 ? 'status-active' : 'status-inactive'}">${user.free_photos}</span></td>
+                    <td><strong>${user.credits}</strong></td>
+                    <td>${user.total_photos}</td>
+                    <td>${formatDate(user.created_at)}</td>
+                    <td>${formatDate(user.last_active_at)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update transactions table
+        function updateTransactionsTable() {
+            const tbody = document.getElementById('transactionsTable');
+            if (currentData.transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">No transactions found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentData.transactions.map(tx => `
+                <tr>
+                    <td><code>${tx.id}</code></td>
+                    <td><code>${tx.device_id}</code></td>
+                    <td><strong>${tx.amount.toLocaleString()} MMK</strong></td>
+                    <td>${tx.credits}</td>
+                    <td>${tx.payment_method}</td>
+                    <td><span class="status-badge status-${tx.status}">${tx.status}</span></td>
+                    <td>${formatDate(tx.created_at)}</td>
+                    <td>
+                        ${tx.status === 'pending' ? `
+                            <button class="btn btn-success" onclick="approveTransaction('${tx.id}')">✅ Approve</button>
+                            <button class="btn btn-danger" onclick="rejectTransaction('${tx.id}')">❌ Reject</button>
+                        ` : `<span class="status-badge status-${tx.status}">Processed</span>`}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update payment accounts table
+        function updatePaymentAccountsTable() {
+            const tbody = document.getElementById('paymentAccountsTable');
+            if (currentData.paymentAccounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No payment accounts found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentData.paymentAccounts.map(account => `
+                <tr>
+                    <td><strong>${account.method}</strong></td>
+                    <td>${account.account_name}</td>
+                    <td><code>${account.account_number}</code></td>
+                    <td><span class="status-badge ${account.is_active ? 'status-active' : 'status-inactive'}">${account.is_active ? 'Active' : 'Inactive'}</span></td>
+                    <td>${formatDate(account.created_at)}</td>
+                    <td>
+                        <button class="btn btn-warning" onclick="togglePaymentAccount('${account.id}')">${account.is_active ? '⏸️ Deactivate' : '▶️ Activate'}</button>
+                        <button class="btn btn-danger" onclick="deletePaymentAccount('${account.id}')">🗑️ Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update images table
+        function updateImagesTable() {
+            const tbody = document.getElementById('imagesTable');
+            if (currentData.images.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No images found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentData.images.map(image => `
+                <tr>
+                    <td><code>${image.id}</code></td>
+                    <td><code>${image.device_id}</code></td>
+                    <td>${image.name}</td>
+                    <td>${image.labels ? image.labels.join(', ') : 'No labels'}</td>
+                    <td>${formatDate(image.created_at)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Transaction actions
+        async function approveTransaction(txId) {
+            try {
+                const response = await fetch(`/api/admin/transactions/${txId}/approve`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Transaction approved successfully!', 'success');
+                    await loadTransactions();
+                    await loadUsers(); // Refresh to show updated credits
+                } else {
+                    showAlert('Error approving transaction: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error approving transaction', 'error');
+            }
+        }
+
+        async function rejectTransaction(txId) {
+            try {
+                const response = await fetch(`/api/admin/transactions/${txId}/reject`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Transaction rejected', 'success');
+                    await loadTransactions();
+                } else {
+                    showAlert('Error rejecting transaction: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error rejecting transaction', 'error');
+            }
+        }
+
+        // Payment account actions
+        function showAddPaymentModal() {
+            document.getElementById('addPaymentModal').style.display = 'block';
+        }
+
+        function closeAddPaymentModal() {
+            document.getElementById('addPaymentModal').style.display = 'none';
+            document.getElementById('addPaymentForm').reset();
+        }
+
+        // Handle add payment form submission
+        document.getElementById('addPaymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                method: document.getElementById('paymentMethod').value,
+                account_name: document.getElementById('accountName').value,
+                account_number: document.getElementById('accountNumber').value,
+                qr_code: document.getElementById('qrCode').value
+            };
+
+            try {
+                const response = await fetch('/api/admin/payment/accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Payment account added successfully!', 'success');
+                    closeAddPaymentModal();
+                    await loadPaymentAccounts();
+                } else {
+                    showAlert('Error adding payment account: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error adding payment account', 'error');
+            }
+        });
+
+        async function togglePaymentAccount(accountId) {
+            try {
+                const response = await fetch(`/api/admin/payment/accounts/${accountId}/toggle`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Payment account status updated!', 'success');
+                    await loadPaymentAccounts();
+                } else {
+                    showAlert('Error updating payment account: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error updating payment account', 'error');
+            }
+        }
+
+        async function deletePaymentAccount(accountId) {
+            if (!confirm('Are you sure you want to delete this payment account?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/payment/accounts/${accountId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Payment account deleted!', 'success');
+                    await loadPaymentAccounts();
+                } else {
+                    showAlert('Error deleting payment account: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error deleting payment account', 'error');
+            }
+        }
+
+        // Refresh functions
+        function refreshTransactions() { loadTransactions(); }
+        function refreshUsers() { loadUsers(); }
+        function refreshPaymentAccounts() { loadPaymentAccounts(); }
+        function refreshImages() { loadImages(); }
+
+        // Utility functions
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addPaymentModal');
+            if (event.target === modal) {
+                closeAddPaymentModal();
+            }
+        }
+    </script>
+</body>
+</html>
         .btn-approve { background: #4caf50; color: white; }
         .btn-reject { background: #f44336; color: white; }
         .btn:hover { opacity: 0.8; }
@@ -209,8 +1062,107 @@
             }
         }
 
+        // ===============================
+        // SETTINGS MANAGEMENT FUNCTIONS
+        // ===============================
+        
+        // Load current settings
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/admin/settings');
+                if (response.ok) {
+                    const data = await response.json();
+                    const settings = data.data.settings;
+                    
+                    // Update display
+                    document.getElementById('currentCreditsPerPhoto').textContent = settings.credits_per_photo;
+                    document.getElementById('currentCreditPrice').textContent = settings.credit_price_mmk;
+                    document.getElementById('currentPhotoPrice').textContent = settings.credits_per_photo * settings.credit_price_mmk;
+                    document.getElementById('currentFreePhotos').textContent = settings.free_photos_limit;
+                    document.getElementById('currentMinPurchase').textContent = settings.minimum_purchase;
+                    document.getElementById('lastUpdated').textContent = new Date(settings.updated_at).toLocaleString();
+                    
+                    return settings;
+                } else {
+                    throw new Error('Failed to load settings');
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                showAlert('Error loading settings', 'error');
+            }
+        }
+
+        // Load current settings into form
+        async function loadCurrentSettings() {
+            try {
+                const settings = await loadSettings();
+                if (settings) {
+                    document.getElementById('creditsPerPhoto').value = settings.credits_per_photo;
+                    document.getElementById('creditPrice').value = settings.credit_price_mmk;
+                    document.getElementById('freePhotosLimit').value = settings.free_photos_limit;
+                    document.getElementById('minimumPurchase').value = settings.minimum_purchase;
+                }
+            } catch (error) {
+                console.error('Error loading current settings:', error);
+            }
+        }
+
+        // Handle settings form submission
+        document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const creditsPerPhoto = parseInt(document.getElementById('creditsPerPhoto').value);
+            const creditPrice = parseInt(document.getElementById('creditPrice').value);
+            const freePhotosLimit = parseInt(document.getElementById('freePhotosLimit').value);
+            const minimumPurchase = parseInt(document.getElementById('minimumPurchase').value);
+            
+            // Calculate photo price for confirmation
+            const photoPrice = creditsPerPhoto * creditPrice;
+            
+            if (!confirm(`Update settings?\n\n` +
+                `• Credits per Photo: ${creditsPerPhoto}\n` +
+                `• Credit Price: ${creditPrice} MMK\n` +
+                `• Photo Price: ${photoPrice} MMK\n` +
+                `• Free Photos: ${freePhotosLimit}\n` +
+                `• Minimum Purchase: ${minimumPurchase} MMK`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/settings', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        credits_per_photo: creditsPerPhoto,
+                        credit_price_mmk: creditPrice,
+                        free_photos_limit: freePhotosLimit,
+                        minimum_purchase: minimumPurchase
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showAlert('Settings updated successfully! New photo price: ' + 
+                        data.data.photo_price_mmk + ' MMK', 'success');
+                    await loadSettings();
+                    document.getElementById('settingsForm').reset();
+                } else {
+                    const error = await response.text();
+                    throw new Error(error);
+                }
+            } catch (error) {
+                console.error('Error updating settings:', error);
+                showAlert('Error updating settings: ' + error.message, 'error');
+            }
+        });
+
         // Load dashboard on page load
-        window.addEventListener('DOMContentLoaded', loadDashboard);
+        window.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            loadSettings();
+        });
 
         // Auto-refresh every 30 seconds
         setInterval(loadDashboard, 30000);

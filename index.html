@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageLabel - AI Photo Labeling App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#1E40AF',
+                        accent: '#10B981'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-tags text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900">ImageLabel</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#features" class="text-gray-700 hover:text-primary transition-colors hidden md:block">Features</a>
+                    <a href="#download" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+                        Download App
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg min-h-screen flex items-center justify-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="animate-float mb-8">
+                <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto shadow-2xl">
+                    <i class="fas fa-camera text-6xl text-primary"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+                AI-Powered Photo Labeling
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-white opacity-90 mb-8 max-w-3xl mx-auto">
+                Transform your photos with intelligent AI labeling. Upload images and get instant, accurate labels powered by advanced machine learning.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#download" class="bg-white text-primary px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
+                    <i class="fab fa-android mr-2"></i>
+                    Download for Android
+                </a>
+                <a href="#features" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-primary transition-colors">
+                    Learn More
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Powerful Features
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Experience the future of photo organization with our advanced AI technology
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-robot text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">AI-Powered Recognition</h3>
+                    <p class="text-gray-600">
+                        Advanced machine learning algorithms automatically identify and label objects, people, and scenes in your photos with high accuracy.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-lightning-bolt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Lightning Fast</h3>
+                    <p class="text-gray-600">
+                        Get instant results with our optimized processing engine. Upload photos and receive labels in seconds, not minutes.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-mobile-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Mobile Optimized</h3>
+                    <p class="text-gray-600">
+                        Designed for mobile-first experience with intuitive touch controls and responsive design that works on any device.
+                    </p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-credit-card text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Credit System</h3>
+                    <p class="text-gray-600">
+                        Flexible pay-per-use system with multiple payment options including WavePay and KBZPay for convenient transactions.
+                    </p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-cloud text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Cloud Storage</h3>
+                    <p class="text-gray-600">
+                        Your labeled photos are securely stored in the cloud, accessible from any device with automatic backup.
+                    </p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chart-bar text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Analytics Dashboard</h3>
+                    <p class="text-gray-600">
+                        Track your usage, monitor spending, and analyze your photo labeling patterns with detailed insights.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    How It Works
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Get started in just three simple steps
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Download & Install</h3>
+                    <p class="text-gray-600">
+                        Download the ImageLabel app from our website and install it on your Android device.
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Purchase Credits</h3>
+                    <p class="text-gray-600">
+                        Buy credits through our secure payment system using WavePay, KBZPay, or other supported methods.
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Upload & Label</h3>
+                    <p class="text-gray-600">
+                        Upload your photos and watch as our AI instantly generates accurate labels for your images.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Credit Packages
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Choose the perfect package for your needs
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Basic Package -->
+                <div class="card-hover bg-white border-2 border-gray-200 rounded-xl p-8 text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Basic</h3>
+                    <div class="text-4xl font-bold text-primary mb-6">100 <span class="text-lg text-gray-600">credits</span></div>
+                    <div class="text-2xl font-semibold text-gray-900 mb-6">1,000 MMK</div>
+                    <ul class="text-left space-y-2 mb-8">
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> 100 photo labels</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Basic AI recognition</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Mobile app access</li>
+                    </ul>
+                    <div class="bg-primary text-white px-6 py-3 rounded-lg">
+                        Get Started
+                    </div>
+                </div>
+                
+                <!-- Standard Package -->
+                <div class="card-hover bg-primary text-white rounded-xl p-8 text-center transform scale-105">
+                    <div class="bg-accent text-primary px-3 py-1 rounded-full text-sm font-semibold mb-4">POPULAR</div>
+                    <h3 class="text-2xl font-bold mb-4">Standard</h3>
+                    <div class="text-4xl font-bold mb-6">200 <span class="text-lg opacity-80">credits</span></div>
+                    <div class="text-2xl font-semibold mb-6">2,000 MMK</div>
+                    <ul class="text-left space-y-2 mb-8">
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> 200 photo labels</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Advanced AI recognition</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Priority processing</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Cloud backup</li>
+                    </ul>
+                    <div class="bg-white text-primary px-6 py-3 rounded-lg font-semibold">
+                        Most Popular
+                    </div>
+                </div>
+                
+                <!-- Premium Package -->
+                <div class="card-hover bg-white border-2 border-gray-200 rounded-xl p-8 text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Premium</h3>
+                    <div class="text-4xl font-bold text-primary mb-6">300 <span class="text-lg text-gray-600">credits</span></div>
+                    <div class="text-2xl font-semibold text-gray-900 mb-6">3,000 MMK</div>
+                    <ul class="text-left space-y-2 mb-8">
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> 300 photo labels</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Premium AI recognition</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Instant processing</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Advanced analytics</li>
+                        <li class="flex items-center"><i class="fas fa-check text-accent mr-2"></i> Priority support</li>
+                    </ul>
+                    <div class="bg-primary text-white px-6 py-3 rounded-lg">
+                        Best Value
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="py-20 gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                Ready to Get Started?
+            </h2>
+            <p class="text-xl text-white opacity-90 mb-12 max-w-2xl mx-auto">
+                Download ImageLabel now and experience the power of AI-driven photo labeling on your mobile device.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <!-- Android Download Button -->
+                <a href="/app-debug.apk" download class="bg-white text-primary px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors inline-flex items-center shadow-lg">
+                    <i class="fab fa-android text-2xl mr-3"></i>
+                    <div class="text-left">
+                        <div class="text-sm opacity-70">Download for</div>
+                        <div class="text-lg font-bold">Android</div>
+                    </div>
+                </a>
+                
+                <!-- QR Code -->
+                <div class="bg-white p-4 rounded-lg shadow-lg">
+                    <div class="w-32 h-32 bg-gray-200 rounded flex items-center justify-center">
+                        <i class="fas fa-qrcode text-4xl text-gray-400"></i>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2">Scan to download</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+                <div class="text-center text-white">
+                    <div class="text-2xl font-bold">10K+</div>
+                    <div class="text-sm opacity-80">Downloads</div>
+                </div>
+                <div class="text-center text-white">
+                    <div class="text-2xl font-bold">4.8★</div>
+                    <div class="text-sm opacity-80">Rating</div>
+                </div>
+                <div class="text-center text-white">
+                    <div class="text-2xl font-bold">99%</div>
+                    <div class="text-sm opacity-80">Accuracy</div>
+                </div>
+                <div class="text-center text-white">
+                    <div class="text-2xl font-bold">24/7</div>
+                    <div class="text-sm opacity-80">Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-tags text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold">ImageLabel</span>
+                    </div>
+                    <p class="text-gray-400">
+                        AI-powered photo labeling for the modern world.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Product</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#download" class="text-gray-400 hover:text-white transition-colors">Download</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="/admin-pro.html" class="text-gray-400 hover:text-white transition-colors">Admin</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Payment Methods</h3>
+                    <div class="flex space-x-4">
+                        <div class="w-12 h-8 bg-blue-600 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold">WAVE</span>
+                        </div>
+                        <div class="w-12 h-8 bg-orange-600 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold">KBZ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 ImageLabel. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
