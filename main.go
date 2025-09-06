@@ -160,6 +160,44 @@ type AdminCreditPackageRequest struct {
 	IsDefault bool   `json:"is_default"`
 }
 
+// App Update structures
+type AppVersion struct {
+	ID            string `json:"id"`
+	VersionCode   int    `json:"version_code"`
+	VersionName   string `json:"version_name"`
+	ApkUrl        string `json:"apk_url"`
+	ApkSize       int64  `json:"apk_size"`
+	ChangeLog     string `json:"change_log"`
+	IsForced      bool   `json:"is_forced"`       // Force update if true
+	IsActive      bool   `json:"is_active"`       // Whether this version is available
+	MinSdkVersion int    `json:"min_sdk_version"` // Minimum Android SDK version
+	CreatedAt     string `json:"created_at"`
+}
+
+type UpdateCheckRequest struct {
+	CurrentVersionCode int    `json:"current_version_code"`
+	DeviceID           string `json:"device_id"`
+	AndroidVersion     int    `json:"android_version"`
+}
+
+type UpdateResponse struct {
+	UpdateAvailable bool       `json:"update_available"`
+	LatestVersion   AppVersion `json:"latest_version,omitempty"`
+	IsForced        bool       `json:"is_forced"`
+	DownloadUrl     string     `json:"download_url,omitempty"`
+}
+
+type AdminAppVersionRequest struct {
+	VersionCode   int    `json:"version_code"`
+	VersionName   string `json:"version_name"`
+	ApkUrl        string `json:"apk_url"`
+	ApkSize       int64  `json:"apk_size"`
+	ChangeLog     string `json:"change_log"`
+	IsForced      bool   `json:"is_forced"`
+	IsActive      bool   `json:"is_active"`
+	MinSdkVersion int    `json:"min_sdk_version"`
+}
+
 // In-memory storage with SQLite database persistence
 var db *sql.DB
 var users = make(map[string]*User)
@@ -167,10 +205,12 @@ var transactions = make(map[string]*PaymentTransaction)
 var images = make(map[string]*ImageData)
 var paymentAccounts = make(map[string]*PaymentAccount)
 var creditPackages = make(map[string]*CreditPackage)
+var appVersions = make(map[string]*AppVersion)
 var systemSettings *SystemSettings
 var usersMutex = sync.RWMutex{}
 var paymentAccountsMutex = sync.RWMutex{}
 var creditPackagesMutex = sync.RWMutex{}
+var appVersionsMutex = sync.RWMutex{}
 var settingsMutex = sync.RWMutex{}
 
 // Database file path
@@ -267,6 +307,19 @@ func createTables() error {
 			price_mmk INTEGER NOT NULL,
 			is_active BOOLEAN NOT NULL DEFAULT 1,
 			is_default BOOLEAN NOT NULL DEFAULT 0,
+			created_at DATETIME NOT NULL
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS app_versions (
+			id TEXT PRIMARY KEY,
+			version_code INTEGER NOT NULL UNIQUE,
+			version_name TEXT NOT NULL,
+			apk_url TEXT NOT NULL,
+			apk_size INTEGER NOT NULL,
+			change_log TEXT,
+			is_forced BOOLEAN NOT NULL DEFAULT 0,
+			is_active BOOLEAN NOT NULL DEFAULT 1,
+			min_sdk_version INTEGER NOT NULL DEFAULT 21,
 			created_at DATETIME NOT NULL
 		)`,
 	}
@@ -443,6 +496,16 @@ func loadDataFromDatabase() error {
 		log.Printf("Loaded %d credit packages from database", packageCount)
 	}
 
+	// Load app versions
+	if err := loadAppVersionsFromDB(); err != nil {
+		log.Printf("Warning: Failed to load app versions: %v", err)
+	} else {
+		appVersionsMutex.RLock()
+		versionCount := len(appVersions)
+		appVersionsMutex.RUnlock()
+		log.Printf("Loaded %d app versions from database", versionCount)
+	}
+
 	return nil
 }
 
@@ -578,6 +641,32 @@ func loadCreditPackagesFromDB() error {
 	return rows.Err()
 }
 
+func loadAppVersionsFromDB() error {
+	query := `SELECT id, version_code, version_name, apk_url, apk_size, change_log, is_forced, is_active, min_sdk_version, created_at FROM app_versions`
+	rows, err := db.Query(query)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	appVersionsMutex.Lock()
+	defer appVersionsMutex.Unlock()
+
+	for rows.Next() {
+		version := &AppVersion{}
+		err := rows.Scan(&version.ID, &version.VersionCode, &version.VersionName, &version.ApkUrl,
+			&version.ApkSize, &version.ChangeLog, &version.IsForced, &version.IsActive,
+			&version.MinSdkVersion, &version.CreatedAt)
+		if err != nil {
+			log.Printf("Error scanning app version: %v", err)
+			continue
+		}
+		appVersions[version.ID] = version
+	}
+
+	return rows.Err()
+}
+
 // Serve admin dashboard
 func serveAdminHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "admin_pro.html")
@@ -657,6 +746,17 @@ func main() {
 	admin.HandleFunc("/credit-packages/{id}", adminDeleteCreditPackageHandler).Methods("DELETE")
 	admin.HandleFunc("/credit-packages/{id}/toggle", adminToggleCreditPackageHandler).Methods("POST")
 
+	// App update system
+	api.HandleFunc("/app/update-check", checkForUpdatesHandler).Methods("POST")
+	api.HandleFunc("/app/download/{version_id}", downloadAppHandler).Methods("GET")
+
+	// Admin app version management
+	admin.HandleFunc("/app-versions", adminGetAppVersionsHandler).Methods("GET")
+	admin.HandleFunc("/app-versions", adminAddAppVersionHandler).Methods("POST")
+	admin.HandleFunc("/app-versions/{id}", adminUpdateAppVersionHandler).Methods("PUT")
+	admin.HandleFunc("/app-versions/{id}", adminDeleteAppVersionHandler).Methods("DELETE")
+	admin.HandleFunc("/app-versions/{id}/toggle", adminToggleAppVersionHandler).Methods("POST")
+
 	admin.HandleFunc("/users", getAllUsersHandler).Methods("GET")
 
 	// Image processing endpoints
@@ -683,7 +783,7 @@ func main() {
 	handler := c.Handler(r)
 
 	fmt.Println("🚀 Go subscription server starting on port 8080...")
-	fmt.Println("🌐 Professional Admin Dashboard: http://localhost:8080/admin.html")
+	fmt.Println("🌐 Professional Admin Dashboard: https://ai.lainlain.online/admin.html")
 	fmt.Println("📋 Available endpoints:")
 	fmt.Println("   === Admin Dashboard ===")
 	fmt.Println("   GET  /admin.html (Professional UI)")
@@ -709,6 +809,15 @@ func main() {
 	fmt.Println("   PUT  /api/admin/payment/accounts/{id}")
 	fmt.Println("   DELETE /api/admin/payment/accounts/{id}")
 	fmt.Println("   POST /api/admin/payment/accounts/{id}/toggle")
+	fmt.Println("   === App Update System ===")
+	fmt.Println("   POST /api/app/update-check")
+	fmt.Println("   GET  /api/app/download/{version_id}")
+	fmt.Println("   === Admin App Versions ===")
+	fmt.Println("   GET  /api/admin/app-versions")
+	fmt.Println("   POST /api/admin/app-versions")
+	fmt.Println("   PUT  /api/admin/app-versions/{id}")
+	fmt.Println("   DELETE /api/admin/app-versions/{id}")
+	fmt.Println("   POST /api/admin/app-versions/{id}/toggle")
 	fmt.Println("   === Image Processing ===")
 	fmt.Println("   GET  /api/images")
 	fmt.Println("   POST /api/images/upload")
@@ -1916,4 +2025,310 @@ func adminToggleCreditPackageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+// ===========================================
+// APP UPDATE SYSTEM HANDLERS
+// ===========================================
+
+// Check for app updates
+func checkForUpdatesHandler(w http.ResponseWriter, r *http.Request) {
+	var req UpdateCheckRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
+		return
+	}
+
+	appVersionsMutex.RLock()
+	defer appVersionsMutex.RUnlock()
+
+	// Find the latest active version
+	var latestVersion *AppVersion
+	for _, version := range appVersions {
+		if !version.IsActive {
+			continue
+		}
+		if req.AndroidVersion < version.MinSdkVersion {
+			continue // Skip versions that don't support this Android version
+		}
+		if latestVersion == nil || version.VersionCode > latestVersion.VersionCode {
+			latestVersion = version
+		}
+	}
+
+	updateResponse := UpdateResponse{
+		UpdateAvailable: false,
+	}
+
+	if latestVersion != nil && latestVersion.VersionCode > req.CurrentVersionCode {
+		updateResponse.UpdateAvailable = true
+		updateResponse.LatestVersion = *latestVersion
+		updateResponse.IsForced = latestVersion.IsForced
+		updateResponse.DownloadUrl = fmt.Sprintf("/api/app/download/%s", latestVersion.ID)
+	}
+
+	response := Response{
+		Message: "Update check completed",
+		Status:  "success",
+		Time:    time.Now().Format(time.RFC3339),
+		Data:    updateResponse,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Download app handler
+func downloadAppHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	versionID := vars["version_id"]
+
+	appVersionsMutex.RLock()
+	version, exists := appVersions[versionID]
+	appVersionsMutex.RUnlock()
+
+	if !exists {
+		http.Error(w, "Version not found", http.StatusNotFound)
+		return
+	}
+
+	if !version.IsActive {
+		http.Error(w, "Version not available", http.StatusNotFound)
+		return
+	}
+
+	// Serve the APK file
+	w.Header().Set("Content-Type", "application/vnd.android.package-archive")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", version.ApkUrl))
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", version.ApkSize))
+
+	http.ServeFile(w, r, version.ApkUrl)
+}
+
+// Admin: Get all app versions
+func adminGetAppVersionsHandler(w http.ResponseWriter, r *http.Request) {
+	appVersionsMutex.RLock()
+	defer appVersionsMutex.RUnlock()
+
+	var versions []*AppVersion
+	for _, version := range appVersions {
+		versions = append(versions, version)
+	}
+
+	response := Response{
+		Message: "App versions retrieved",
+		Status:  "success",
+		Time:    time.Now().Format(time.RFC3339),
+		Data:    versions,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Admin: Add new app version
+func adminAddAppVersionHandler(w http.ResponseWriter, r *http.Request) {
+	var req AdminAppVersionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
+		return
+	}
+
+	// Validate required fields
+	if req.VersionCode <= 0 || req.VersionName == "" || req.ApkUrl == "" {
+		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	// Check if version code already exists
+	appVersionsMutex.RLock()
+	for _, existing := range appVersions {
+		if existing.VersionCode == req.VersionCode {
+			appVersionsMutex.RUnlock()
+			http.Error(w, "Version code already exists", http.StatusConflict)
+			return
+		}
+	}
+	appVersionsMutex.RUnlock()
+
+	// Generate ID
+	versionID := generateID()
+
+	// Create new version
+	version := &AppVersion{
+		ID:            versionID,
+		VersionCode:   req.VersionCode,
+		VersionName:   req.VersionName,
+		ApkUrl:        req.ApkUrl,
+		ApkSize:       req.ApkSize,
+		ChangeLog:     req.ChangeLog,
+		IsForced:      req.IsForced,
+		IsActive:      req.IsActive,
+		MinSdkVersion: req.MinSdkVersion,
+		CreatedAt:     time.Now().Format(time.RFC3339),
+	}
+
+	// Save to database
+	if err := saveAppVersionToDB(version); err != nil {
+		log.Printf("Error saving app version to database: %v", err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	// Save to memory
+	appVersionsMutex.Lock()
+	appVersions[versionID] = version
+	appVersionsMutex.Unlock()
+
+	response := Response{
+		Message: "App version added successfully",
+		Status:  "success",
+		Time:    time.Now().Format(time.RFC3339),
+		Data:    version,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Admin: Update app version
+func adminUpdateAppVersionHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	versionID := vars["id"]
+
+	var req AdminAppVersionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
+		return
+	}
+
+	appVersionsMutex.Lock()
+	defer appVersionsMutex.Unlock()
+
+	version, exists := appVersions[versionID]
+	if !exists {
+		http.Error(w, "Version not found", http.StatusNotFound)
+		return
+	}
+
+	// Check if new version code conflicts with other versions
+	if req.VersionCode != version.VersionCode {
+		for id, existing := range appVersions {
+			if id != versionID && existing.VersionCode == req.VersionCode {
+				http.Error(w, "Version code already exists", http.StatusConflict)
+				return
+			}
+		}
+	}
+
+	// Update version
+	version.VersionCode = req.VersionCode
+	version.VersionName = req.VersionName
+	version.ApkUrl = req.ApkUrl
+	version.ApkSize = req.ApkSize
+	version.ChangeLog = req.ChangeLog
+	version.IsForced = req.IsForced
+	version.IsActive = req.IsActive
+	version.MinSdkVersion = req.MinSdkVersion
+
+	// Save to database
+	if err := saveAppVersionToDB(version); err != nil {
+		log.Printf("Error updating app version in database: %v", err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	response := Response{
+		Message: "App version updated successfully",
+		Status:  "success",
+		Time:    time.Now().Format(time.RFC3339),
+		Data:    version,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Admin: Delete app version
+func adminDeleteAppVersionHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	versionID := vars["id"]
+
+	appVersionsMutex.Lock()
+	defer appVersionsMutex.Unlock()
+
+	version, exists := appVersions[versionID]
+	if !exists {
+		http.Error(w, "Version not found", http.StatusNotFound)
+		return
+	}
+
+	// Delete from database
+	if err := deleteAppVersionFromDB(versionID); err != nil {
+		log.Printf("Error deleting app version from database: %v", err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	// Delete from memory
+	delete(appVersions, versionID)
+
+	response := Response{
+		Message: fmt.Sprintf("App version %s deleted successfully", version.VersionName),
+		Status:  "success",
+		Time:    time.Now().Format(time.RFC3339),
+		Data:    map[string]string{"deleted_id": versionID},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Admin: Toggle app version active status
+func adminToggleAppVersionHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	versionID := vars["id"]
+
+	appVersionsMutex.Lock()
+	defer appVersionsMutex.Unlock()
+
+	version, exists := appVersions[versionID]
+	if !exists {
+		http.Error(w, "Version not found", http.StatusNotFound)
+		return
+	}
+
+	version.IsActive = !version.IsActive
+
+	// Save to database
+	if err := saveAppVersionToDB(version); err != nil {
+		log.Printf("Error saving app version to database: %v", err)
+	}
+
+	response := Response{
+		Message: fmt.Sprintf("App version %s", map[bool]string{true: "activated", false: "deactivated"}[version.IsActive]),
+		Status:  "success",
+		Time:    time.Now().Format(time.RFC3339),
+		Data:    version,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Database helper functions for app versions
+func saveAppVersionToDB(version *AppVersion) error {
+	query := `INSERT OR REPLACE INTO app_versions 
+		(id, version_code, version_name, apk_url, apk_size, change_log, is_forced, is_active, min_sdk_version, created_at) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err := db.Exec(query, version.ID, version.VersionCode, version.VersionName, version.ApkUrl,
+		version.ApkSize, version.ChangeLog, version.IsForced, version.IsActive, version.MinSdkVersion, version.CreatedAt)
+	return err
+}
+
+func deleteAppVersionFromDB(versionID string) error {
+	query := `DELETE FROM app_versions WHERE id = ?`
+	_, err := db.Exec(query, versionID)
+	return err
 }
